@@ -3,11 +3,14 @@
 #include <fstream>
 #include <iomanip>
 #include "Utils.hpp"
+#include "Eigen/Eigen"
 
 
 using namespace std;
-namespace FractureLibrary{
+using namespace Eigen;
 
+
+namespace FractureLibrary{
 
 bool ImportFracture(const string &fileName,
                     DFN &dfn)
@@ -52,58 +55,29 @@ bool ImportFracture(const string &fileName,
         getline(file, header);
         cout << header << endl;   // # Vertices
 
-        vector<double> xCoordinates = {};
-        vector<double> yCoordinates = {};
-        vector<double> zCoordinates = {};
+        MatrixXd vertices = MatrixXd::Zero(dfn.NumberVertices, 3);
 
-        for(unsigned int j = 0; j < dfn.NumberVertices - 1; j++)
+        for(unsigned int j = 0; j < 3; j++)
         {
-            getline(file, line, ';');
-            istringstream coordinate(line);
-            double x;
-            coordinate >> x;
-            xCoordinates.push_back(x);
+            for(unsigned int k = 0; k < dfn.NumberVertices - 1; k++)
+            {
+                getline(file, line, ';');
+                istringstream coordinate(line);
+                double convCoordinate;
+                coordinate >> convCoordinate;
+                vertices(k, j) = convCoordinate;
+            }
+
+            getline(file, line);
+            istringstream lastCoordinate(line);
+            double convCoordinate;
+            lastCoordinate >> convCoordinate;
+            vertices(dfn.NumberVertices - 1, 0) = convCoordinate;
         }
 
-        getline(file, line);
-        istringstream coordinateX(line);
-        double x;
-        coordinateX >> x;
-        xCoordinates.push_back(x);
-
-        for(unsigned int j = 0; j < dfn.NumberVertices - 1; j++)
+        for(unsigned int k = 0; k < dfn.NumberVertices; k++)
         {
-            getline(file, line, ';');
-            istringstream coordinate(line);
-            double y;
-            coordinate >> y;
-            yCoordinates.push_back(y);
-        }
-
-        getline(file, line);
-        istringstream coordinateY(line);
-        double y;
-        coordinateY >> y;
-        yCoordinates.push_back(y);
-
-        for(unsigned int j = 0; j < dfn.NumberVertices - 1; j++)
-        {
-            getline(file, line, ';');
-            istringstream coordinate(line);
-            double z;
-            coordinate >> z;
-            zCoordinates.push_back(z);
-        }
-
-        getline(file, line);
-        istringstream coordinateZ(line);
-        double z;
-        coordinateZ >> z;
-        zCoordinates.push_back(z);
-
-        for(unsigned int j = 0; j < dfn.NumberVertices; j++)
-        {
-            Vector3d coordinates = {xCoordinates[j], yCoordinates[j], zCoordinates[j]};
+            Vector3d coordinates = {vertices(k, 0), vertices(k, 1), vertices(k, 2)};
             dfn.FracturesCoordinates.push_back(coordinates);
         }
 
@@ -111,7 +85,7 @@ bool ImportFracture(const string &fileName,
         {
             for(unsigned int k = 0; k < 3; k++)
             {
-                cout << setprecision(16) << dfn.FracturesCoordinates[j][k] << endl;
+                cout << fixed << setprecision(16) << dfn.FracturesCoordinates[j][k] << endl;
             }
         }
         cout << endl;

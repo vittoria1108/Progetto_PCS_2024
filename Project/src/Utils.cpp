@@ -55,30 +55,27 @@ bool ImportFracture(const string &fileName,
         getline(file, header);
         cout << header << endl;   // # Vertices
 
-        MatrixXd vertices = MatrixXd::Zero(dfn.NumberVertices, 3);
+        vector<Vector3d> vertices;
+        vertices.resize(dfn.NumberVertices);
 
         for(unsigned int j = 0; j < 3; j++)
         {
-            for(unsigned int k = 0; k < dfn.NumberVertices - 1; k++)
-            {
-                getline(file, line, ';');
-                istringstream coordinate(line);
-                double convCoordinate;
-                coordinate >> convCoordinate;
-                vertices(k, j) = convCoordinate;
-            }
-
             getline(file, line);
-            istringstream lastCoordinate(line);
-            double convCoordinate;
-            lastCoordinate >> convCoordinate;
-            vertices(dfn.NumberVertices - 1, 0) = convCoordinate;
+            replace(line.begin(), line.end(), ';', ' ');
+            cout << line << endl;
+            istringstream converter(line);
+
+            for(unsigned int k = 0; k < dfn.NumberVertices; k++)
+            {
+                double coordinate;
+                converter >> coordinate;
+                vertices[k][j] = coordinate;
+            }
         }
 
         for(unsigned int k = 0; k < dfn.NumberVertices; k++)
         {
-            Vector3d coordinates = {vertices(k, 0), vertices(k, 1), vertices(k, 2)};
-            dfn.FracturesCoordinates.push_back(coordinates);
+            dfn.FracturesCoordinates.push_back(vertices[k]);
         }
 
         for(unsigned int j = 0; j < dfn.NumberVertices; j++)

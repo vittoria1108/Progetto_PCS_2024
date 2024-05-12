@@ -11,9 +11,6 @@ namespace FractureLibrary{
 bool ImportFracture(const string &filename,
                     DFN& dfn);
 
-
-
-
 }
 
 

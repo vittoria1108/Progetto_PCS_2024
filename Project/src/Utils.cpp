@@ -52,13 +52,10 @@ bool ImportFracture(const string &fileName,
         nVertices >> dfn.NumberVertices;
         cout << "numVertices: " << dfn.NumberVertices << endl;   // numVertices
 
-        dfn.FracturesCoordinates.resize(dfn.NumberVertices);
+        dfn.VerticesCoordinates.reserve(dfn.NumberVertices);
 
         getline(file, header);
         cout << header << endl;   // # Vertices
-
-        vector<Vector3d> vertices;
-        vertices.resize(dfn.NumberVertices);
 
         for(unsigned int j = 0; j < 3; j++)
         {
@@ -71,20 +68,15 @@ bool ImportFracture(const string &fileName,
             {
                 double coordinate;
                 converter >> coordinate;
-                vertices[k][j] = coordinate;
+                dfn.VerticesCoordinates[k][j] = coordinate;
             }
-        }
-
-        for(unsigned int k = 0; k < dfn.NumberVertices; k++)
-        {
-            dfn.FracturesCoordinates[k] = {vertices[k][0], vertices[k][1], vertices[k][2]};
         }
 
         for(unsigned int j = 0; j < dfn.NumberVertices; j++)
         {
             for(unsigned int k = 0; k < 3; k++)
             {
-                cout << fixed << setprecision(16) << dfn.FracturesCoordinates[j][k] << endl;
+                cout << fixed << setprecision(16) << dfn.VerticesCoordinates[j][k] << endl;
             }
         }
         cout << endl;

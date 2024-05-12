@@ -14,7 +14,7 @@ struct DFN{
 
     unsigned int NumberFractures = 0;
     vector<unsigned int> FracturesId = {};
-    vector<Vector3d> FracturesCoordinates = {};
+    vector<Vector3d> VerticesCoordinates = {};
     unsigned int NumberVertices = 0;
 
 

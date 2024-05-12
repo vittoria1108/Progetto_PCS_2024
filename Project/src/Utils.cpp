@@ -2,6 +2,8 @@
 #include <sstream>
 #include <fstream>
 #include "Utils.hpp"
+#include <iomanip>
+
 
 using namespace std;
 
@@ -30,7 +32,6 @@ bool ImportFracture(const string &filename,
     nfractures >> dfn.NumberFractures;
     cout << dfn.NumberFractures << endl;   // 3
 
-    dfn.FracturesId.reserve(dfn.NumberFractures);
 
     for(unsigned int i=0; i<dfn.NumberFractures; i++)
     {
@@ -52,31 +53,39 @@ bool ImportFracture(const string &filename,
         getline(file, header);
         cout << header << endl;   // # Vertices
 
-        getline(file, header);
-        getline(file, header);
-        getline(file, header);
 
+        dfn.VerticesCoordinates.reserve(dfn.NumberVertices);
+
+        for(unsigned int j = 0; j < 3; j++)
+        {
+            getline(file, line);
+            replace(line.begin(), line.end(), ';', ' ');
+            istringstream converter(line);
+
+            for(unsigned int k = 0; k < dfn.NumberVertices; k++)
+            {
+                double coordinate;
+                converter >> coordinate;
+                dfn.VerticesCoordinates[k][j] = coordinate;
+            }
+        }
+
+        for(unsigned int k = 0; k < dfn.NumberVertices; k++)
+        {
+            for(unsigned int j = 0; j < 3; j++)
+            {
+                cout << scientific << setprecision(16) << dfn.VerticesCoordinates[k][j] << endl;
+            }
+        }
         cout << endl;
-
     }
     cout << endl;
-
-    for(unsigned int i=0; i<dfn.NumberFractures; i++)
-    {
-        cout << dfn.FracturesId[i] << " ";
-    }
-    cout << endl;
-
-
-
 
 
     file.close();
 
 
     return true;
-
-
 
 }
 

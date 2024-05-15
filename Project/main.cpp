@@ -9,10 +9,17 @@ using namespace std;
 using namespace FractureLibrary;
 
 
-int main()
+int main(int argc, char ** argv)
 {
     DFN dfn;
-    string filename = "C:/Users/user/OneDrive/Desktop/Progetto_PCS_2024/Project/DFN/FR3_data.txt";
+
+    if(argc == 1)
+        return 2;
+
+    istringstream str(argv[1]);
+    string name;
+    str >> name;
+    string filename = "./DFN/"  + name;
 
     if(!ImportFracture(filename,
                         dfn))

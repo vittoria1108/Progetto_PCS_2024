@@ -165,10 +165,13 @@ bool CalculateTraces(const Fracture &f1,
         if(A.determinant() != 0)
         {
             Vector2d solution = A.fullPivLu().solve(b);
-            double check = dir[2]*solution[0] + b[2]*solution[1];
 
-            if(check == 0)
-                intersection = true;
+            if(solution[0] >= 0 && solution[0] <= 1)
+            {
+                double check = dir[2]*solution[0] + b[2]*solution[1];
+                if(check == 0)
+                    intersection = true;
+            }
         }
     }
 
@@ -191,10 +194,14 @@ bool CalculateTraces(const Fracture &f1,
         if(A.determinant() != 0)
         {
             Vector2d solution = A.fullPivLu().solve(b);
-            double check = dir[2]*solution[0] + b[2]*solution[1];
 
-            if(check == 0)
-                intersection = true;
+            if(solution[0] >= 0 && solution[0] <= 1)
+            {
+                double check = dir[2]*solution[0] + b[2]*solution[1];
+                if(check == 0)
+                    intersection = true;
+            }
+
         }
     }
 

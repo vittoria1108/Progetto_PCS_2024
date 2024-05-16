@@ -77,9 +77,6 @@ Vector4d CalculatePlane(const Fracture &f)
 
     Vector3d normal = vector1.cross(vector2);
 
-    double norm = sqrt(normal.transpose() * normal);
-    normal /= norm;
-
     Vector3d point = f.VerticesCoordinates.col(0);
     double d = -(normal[0]*point[0] + normal[1]*point[1] + normal[2]*point[2]);
 
@@ -98,6 +95,9 @@ double CalculateDistance(const Vector3d point1,
 bool CalculateTraces(const Fracture &f1,
                      const Fracture &f2)
 {
+    double tol = 10 * numeric_limits<double>::epsilon();
+
+    // Controllo che le circoferenze che contengono i due poligoni non si intersecano
     double r1 = 0;
     for(unsigned int i = 0; i < f1.NumberVertices; i++)
     {
@@ -118,9 +118,10 @@ bool CalculateTraces(const Fracture &f1,
 
     double barDistances = CalculateDistance(f1.Barycentre, f2.Barycentre);
 
-    if(abs(barDistances - r1 - r2) > 10 * numeric_limits<double>::epsilon())
+    if(abs(barDistances - r1 - r2) > tol)
         return false;
 
+    // Controllo che i piani contenenti i due poligoni non siano paralleli
     Vector4d plane1 = CalculatePlane(f1);
     Vector4d plane2 = CalculatePlane(f2);
 
@@ -131,12 +132,77 @@ bool CalculateTraces(const Fracture &f1,
 
     for(unsigned int i = 0; i < 3; i++)
     {
-        if(abs(t[i]) > 10 * numeric_limits<double>::epsilon())
+        if(abs(t[i]) > tol)
             break;
 
         return false;
     }
 
+    // Se non sono paralleli trovo la retta di intersezione
+    Matrix3d normalMatrix;
+    normalMatrix.row(0) = normal1;
+    normalMatrix.row(1) = normal2;
+    normalMatrix.row(2) = t;
+
+    Vector3d constantTerms = {plane1[3], plane2[3], 0};
+
+    Vector3d point = normalMatrix.fullPivLu().solve(constantTerms);
+
+    // Controllo se la retta interseca le figure
+    bool intersection = false;
+
+    for(unsigned int i = 0; i < f1.NumberVertices - 1; i++)
+    {
+        Vector3d dir = f1.VerticesCoordinates.col(i + 1) - f1.VerticesCoordinates.col(i);
+        Vector3d bTemp = point - f1.VerticesCoordinates.col(i);
+        Vector2d b = {bTemp[0], bTemp[1]};
+        Matrix2d A;
+        A(0, 0) = dir[0];
+        A(1, 0) = dir[1];
+        A(0, 1) = b[0];
+        A(1, 1) = b[1];
+
+        if(A.determinant() != 0)
+        {
+            Vector2d solution = A.fullPivLu().solve(b);
+            double check = dir[2]*solution[0] + b[2]*solution[1];
+
+            if(check == 0)
+                intersection = true;
+        }
+    }
+
+    if(!intersection)
+        return false;
+
+    intersection = false;
+
+    for(unsigned int i = 0; i < f2.NumberVertices - 1; i++)
+    {
+        Vector3d dir = f2.VerticesCoordinates.col(i + 1) - f2.VerticesCoordinates.col(i);
+        Vector3d bTemp = point - f2.VerticesCoordinates.col(i);
+        Vector2d b = {bTemp[0], bTemp[1]};
+        Matrix2d A;
+        A(0, 0) = dir[0];
+        A(1, 0) = dir[1];
+        A(0, 1) = b[0];
+        A(1, 1) = b[1];
+
+        if(A.determinant() != 0)
+        {
+            Vector2d solution = A.fullPivLu().solve(b);
+            double check = dir[2]*solution[0] + b[2]*solution[1];
+
+            if(check == 0)
+                intersection = true;
+        }
+    }
+
+    if(!intersection)
+        return false;
+
+
+    return true;
 }
 
 }

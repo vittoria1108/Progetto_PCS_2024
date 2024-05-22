@@ -11,14 +11,26 @@ using namespace Eigen;
 
 namespace FractureLibrary{
 
+struct Trace{
+    Vector2i Ids = {};
+    MatrixXd EndPointsCoordinates = {};
+    map<unsigned int, bool> Tips = {};
+};
+
+struct Fracture{ //struct con gli attributi di ogni frattura del dfn
+    unsigned int Id = 0;
+    unsigned int NumVertices = 0;
+    MatrixXd VerticesCoordinates = {};
+    Vector3d Barycentre = {};
+    vector<Trace> Traces = {};
+};
+
 struct DFN{
 
     unsigned int NumberFractures = 0;
-    vector<unsigned int> FracturesId = {};
-    map<int, vector<Vector3d>> VerticesCoordinates = {}; //mappa con chiave l'id della frattura e con dentro il vettore contenente le coordiante dei vertici
-    vector<unsigned int> NumberVertices = {};
-
+    vector<Fracture> Fractures = {}; // vettore che riferisce ad ognuna delle fratture ( con i relativi attributi)
 };
+
 
 }
 

@@ -16,8 +16,9 @@ double CalculateDistance(const Vector3d point1,
 
 Vector4d CalculatePlane(const Fracture &f);
 
-bool CalculateTraces(const Fracture &f1,
-                     const Fracture &f2);
+bool CalculateTraces(Fracture &f1,
+                     Fracture &f2,
+                     unsigned int &id);
 
 }
 

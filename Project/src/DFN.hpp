@@ -13,10 +13,10 @@ namespace FractureLibrary{
 
 struct Trace{
 
-    Vector2i Ids = {};
+    unsigned int Id;
+    Vector2i FracturesIds = {};
     MatrixXd EndpointsCoordinates = {};
-    map<unsigned int, bool> Tips = {};
-
+    double Length;
 };
 
 struct Fracture{
@@ -25,8 +25,8 @@ struct Fracture{
     unsigned int NumberVertices = 0;
     MatrixXd VerticesCoordinates = {};
     Vector3d Barycentre = {};
+    map<unsigned int, bool> Tips = {};
     vector<Trace> Traces = {};
-
 };
 
 struct DFN{

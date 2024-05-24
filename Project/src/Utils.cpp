@@ -15,7 +15,7 @@ namespace FractureLibrary{
 bool CompareTraces(const Trace &t1,
                    const Trace &t2)
 {
-    return t1.Length < t2.Length;
+    return t1.Length > t2.Length;
 }
 
 bool ImportFracture(const string &fileName,
@@ -77,25 +77,19 @@ bool ImportFracture(const string &fileName,
         for(unsigned int j = 0; j < dfn.NumberFractures; j++)
         {
             if(i < j)
-                CalculateTraces(dfn.Fractures[i], dfn.Fractures[j], traceId);
+            {
+                CalculateTraces(dfn, dfn.Fractures[i], dfn.Fractures[j], traceId);
+            }
         }
     }
+
+    dfn.NumberTraces = traceId;
 
     for(unsigned int i = 0; i < dfn.NumberFractures; i++)
     {
-        sort(dfn.Fractures[i].Traces.begin(), dfn.Fractures[i].Traces.end(), CompareTraces);
+        sort(dfn.Fractures[i].nTraces.begin(), dfn.Fractures[i].nTraces.end(), CompareTraces);
+        sort(dfn.Fractures[i].pTraces.begin(), dfn.Fractures[i].pTraces.end(), CompareTraces);
     }
-
-    /*for(unsigned int i = 0; i < dfn.NumberFractures; i++)
-    {
-        cout << "Fracture " << dfn.Fractures[i].Id << endl;
-        for(unsigned int j = 0; j < dfn.Fractures[i].Traces.size(); j++)
-        {
-            cout << dfn.Fractures[i].Traces[j].Length << endl;
-        }
-
-        cout << endl;
-    }*/
 
     file.close();
 
@@ -220,7 +214,8 @@ bool IntersectionFractureLine(const Fracture &f,
     return true;
 }
 
-bool CalculateTraces(Fracture &f1,
+bool CalculateTraces(DFN &dfn,
+                     Fracture &f1,
                      Fracture &f2,
                      unsigned int &id)
 {
@@ -291,29 +286,97 @@ bool CalculateTraces(Fracture &f1,
 
     trace.EndpointsCoordinates = endPoints;
 
-    if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
-    {
-        f1.Tips[trace.Id] = true;
-        f2.Tips[trace.Id] = false;
-    }
-    else if(beta_2[0] > beta_1[0] && beta_2[1] < beta_1[1])
-    {
-        f1.Tips[trace.Id] = false;
-        f2.Tips[trace.Id] = true;
-    }
-    else
-    {
-        f1.Tips[trace.Id] = false;
-        f2.Tips[trace.Id] = false;
-    }
-
     double length = CalculateDistance(endPoints.row(0), endPoints.row(1));
     trace.Length = length;
 
-    f1.Traces.push_back(trace);
-    f2.Traces.push_back(trace);
+    if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
+    {
+        f1.Tips[trace.Id] = false;
+        f1.pTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = true;
+        f2.nTraces.push_back(trace);
+    }
+    else if(beta_2[0] > beta_1[0] && beta_2[1] < beta_1[1])
+    {
+        f1.Tips[trace.Id] = true;
+        f1.nTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = false;
+        f2.pTraces.push_back(trace);
+    }
+    else if(beta_1[0] == beta_2[0] && beta_1[1] == beta_2[1])
+    {
+        f1.Tips[trace.Id] = false;
+        f1.pTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = false;
+        f2.pTraces.push_back(trace);
+    }
+    else
+    {
+        f1.Tips[trace.Id] = true;
+        f1.nTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = true;
+        f2.nTraces.push_back(trace);
+    }
+
+    dfn.Traces.push_back(trace);
 
   return true;
+}
+
+void WriteOutputFiles(const string &outputTracesFile,
+                      const string &outputTipsFile,
+                      const DFN &dfn)
+{
+    ofstream tracesFile(outputTracesFile);
+
+    tracesFile << "# Number of Traces" << endl;
+    tracesFile << dfn.NumberTraces << endl;
+
+    tracesFile << "# TraceId; FractureId1; FractureId2; X1; Y1; Z1; X2; Y2; Z2" << endl;
+
+    for(Trace trace : dfn.Traces)
+    {
+        tracesFile << trace.Id << "; " << trace.FracturesIds[0] << "; " << trace.FracturesIds[1] << "; ";
+
+        for(unsigned int i = 0; i < 2; i++)
+        {
+            for(unsigned int j = 0; j < 3; j++)
+            {
+                if(i != 2 || j != 3)
+                    tracesFile << trace.EndpointsCoordinates(i, j) << "; ";
+            }
+        }
+
+        tracesFile << trace.EndpointsCoordinates(1, 2) << endl;
+    }
+
+    tracesFile.close();
+
+    ofstream tipsFile(outputTipsFile);
+
+    for(const Fracture &f : dfn.Fractures)
+    {
+        tipsFile << "# FractureId; NumTraces" << endl;
+        tipsFile << f.Id << "; " << f.pTraces.size() + f.nTraces.size() << endl;
+
+        tipsFile << "# TraceId; Tips; Length" << endl;
+
+        for(const Trace &t : f.nTraces)
+        {
+            tipsFile << t.Id << "; true; " << t.Length << endl;
+        }
+
+        for(const Trace &t : f.pTraces)
+        {
+            tipsFile << t.Id << "; false; " << t.Length << endl;
+        }
+    }
+
+    tipsFile.close();
 }
 
 }

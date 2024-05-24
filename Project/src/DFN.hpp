@@ -17,6 +17,7 @@ struct Trace{
     Vector2i FracturesIds = {};
     MatrixXd EndpointsCoordinates = {};
     double Length;
+
 };
 
 struct Fracture{
@@ -26,13 +27,18 @@ struct Fracture{
     MatrixXd VerticesCoordinates = {};
     Vector3d Barycentre = {};
     map<unsigned int, bool> Tips = {};
-    vector<Trace> Traces = {};
+    vector<Trace> nTraces = {};
+    vector<Trace> pTraces = {};
+
 };
 
 struct DFN{
 
     unsigned int NumberFractures = 0;
     vector<Fracture> Fractures = {};
+
+    unsigned int NumberTraces = 0;
+    vector<Trace> Traces = {};
 
 };
 

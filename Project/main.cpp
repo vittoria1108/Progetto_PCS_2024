@@ -13,35 +13,35 @@ int main(int argc, char **argv)
 {
     DFN dfn;
     if(argc == 1)
-        return 2;
+        return 1;
+
     istringstream str(argv[1]);
     string name;
     str >> name;
-    string filename = "./DFN/" + name;
+    double tol = 10 * numeric_limits<double>::epsilon(); //tolleranza di default
 
-    if(!ImportFracture(filename, dfn))
+    if(argc == 3)//se viene inserita in command line la tolleranza
     {
-        return 1;
+        istringstream conv(argv[2]);
+        double tol_input;
+        conv >> tol_input;
+        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); //scelgo la tol più alta tra default e input
     }
 
-    /*
-    Vector4d aa = CalculatePlane(dfn.Fractures[1]);
-    cout << "Coefficient of the plane" << endl;
-    cout << "[ ";
-    for (unsigned int i = 0; i<4; i++)
-        cout << aa[i] << " ";
-    cout << "] "<< endl;
-    */
-    for (unsigned int i = 0; i < dfn.NumberFractures; i++)
+     string filename = "./DFN/" + name +".txt";
+    if(!ImportFracture(filename,
+                        dfn,
+                        tol))
     {
-        for (unsigned int j = 0; j< dfn.NumberFractures; j++)
-        {
-            if (i<j)
-                CalculateTraces(dfn.Fractures[i], dfn.Fractures[j]);
-        }
+        return 2;
     }
 
+    string outputTracesFile = "Traces_" + name + ".txt";
+    string outputTipsFile = "Tips_" + name + ".txt";
 
+    WriteOutputFiles(outputTracesFile,
+                     outputTipsFile,
+                     dfn);
 
     return 0;
 }

@@ -21,8 +21,19 @@ int main(int argc, char ** argv)
     str >> name;
     string fileName = "./DFN/"  + name + ".txt";
 
-    if(!ImportFracture(fileName,
-                        dfn))
+    double tol = 10 * numeric_limits<double>::epsilon(); //tolleranza di default
+
+    if(argc == 3)//se viene inserita in command line la tolleranza
+    {
+        istringstream conv(argv[2]);
+        double tol_input;
+        conv >> tol_input;
+        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); //scelgo la tol più alta tra default e input
+    }
+
+    if(!ReadDFN(fileName,
+                dfn,
+                tol))
     {
         return 2;
     }

@@ -25,7 +25,10 @@ bool ImportFracture(const string &fileName,
     ifstream file(fileName);
 
     if(file.fail())
+    {
+        cerr << "Input file not found";
         return false;
+    }
 
     string header;
     string line;
@@ -70,31 +73,9 @@ bool ImportFracture(const string &fileName,
         dfn.Fractures[i].Barycentre = barycentre;
     }
 
-    unsigned int traceId = 0;
-
-    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
-    {
-        for(unsigned int j = 0; j < dfn.NumberFractures; j++)
-        {
-            if(i < j)
-            {
-                CalculateTraces(dfn, dfn.Fractures[i], dfn.Fractures[j], traceId);
-            }
-        }
-    }
-
-    dfn.NumberTraces = traceId;
-
-    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
-    {
-        sort(dfn.Fractures[i].nTraces.begin(), dfn.Fractures[i].nTraces.end(), CompareTraces);
-        sort(dfn.Fractures[i].pTraces.begin(), dfn.Fractures[i].pTraces.end(), CompareTraces);
-    }
-
     file.close();
 
     return true;
-
 }
 
 Vector4d CalculatePlane(const Fracture &f)
@@ -136,10 +117,9 @@ double CalculateR(const Fracture &f)
 bool FindIntersectionLine(const Vector4d &plane1,
                           const Vector4d &plane2,
                           Vector3d &p_r,
-                          Vector3d &t_r)
+                          Vector3d &t_r,
+                          const double &tol)
 {
-    double tol = 10 * numeric_limits<double>::epsilon();
-
     Vector3d normal1 = {plane1[0], plane1[1], plane1[2]};
     Vector3d normal2 = {plane2[0], plane2[1], plane2[2]};
 
@@ -166,11 +146,9 @@ bool FindIntersectionLine(const Vector4d &plane1,
 bool IntersectionFractureLine(const Fracture &f,
                               const Vector3d &p_r,
                               const Vector3d &t_r,
-                              Vector2d &beta)
+                              Vector2d &beta,
+                              const double &tol)
 {
-    double tol = 10 * numeric_limits<double>::epsilon();
-
-    bool intersection = false;
     unsigned int counter = 0;
 
     for(unsigned int i = 0; i < f.NumberVertices; i++)
@@ -199,28 +177,34 @@ bool IntersectionFractureLine(const Fracture &f,
                 beta[counter++] = betaTemp;
 
                 if(counter == 2)
-                    break;
+                {
+                    sort(beta.begin(), beta.end());
+                    return true;
+                }
+            }
+        }
+        else if((abs((p_s[0] - p_r[0]) / t_r[0] - (p_s[1] - p_r[1]) / t_r[1])) < tol && abs(((p_s[0] - p_r[0]) / t_r[0] - (p_s[2] - p_r[2]) / t_r[2])))
+        {
+            double betaTemp = ((p_s - p_r).dot(t_r)) / (t_r.dot(t_r));
+            beta[counter++] = betaTemp;
 
-                intersection = true;
+            if(counter == 2)
+            {
+                sort(beta.begin(), beta.end());
+                return true;
             }
         }
     }
 
-    if(!intersection)
-        return false;
-
-    sort(beta.begin(), beta.end());
-
-    return true;
+    return false;
 }
 
-bool CalculateTraces(DFN &dfn,
+void CalculateTraces(DFN &dfn,
                      Fracture &f1,
                      Fracture &f2,
-                     unsigned int &id)
+                     unsigned int &id,
+                     const double &tol)
 {
-    double tol = 10 * numeric_limits<double>::epsilon();
-
     // Controllo che le circoferenze che contengono i due poligoni non si intersecano
 
     double r1 = CalculateR(f1);
@@ -229,7 +213,7 @@ bool CalculateTraces(DFN &dfn,
     double barDistances = CalculateDistance(f1.Barycentre, f2.Barycentre);
 
     if(barDistances - (r1 + r2) > tol)
-        return false;
+        return;
 
     // Controllo che i piani contenenti i due poligoni non siano paralleli
     Vector4d plane1 = CalculatePlane(f1);
@@ -237,26 +221,26 @@ bool CalculateTraces(DFN &dfn,
     Vector3d p_r;
     Vector3d t_r;
 
-    if(!FindIntersectionLine(plane1, plane2, p_r, t_r))
-        return false;
+    if(!FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
+        return;
 
     // Controllo se la retta interseca le figure
 
     Vector2d beta_1 = {};
 
-    if(!IntersectionFractureLine(f1, p_r, t_r, beta_1))
-        return false;
+    if(!IntersectionFractureLine(f1, p_r, t_r, beta_1, tol))
+        return;
 
     Vector2d beta_2 = {};
 
-    if(!IntersectionFractureLine(f2, p_r, t_r, beta_2))
-        return false;
+    if(!IntersectionFractureLine(f2, p_r, t_r, beta_2, tol))
+        return;
 
     if(beta_1[1] < beta_2[0])
-        return false;
+        return;
 
     if(beta_2[1] < beta_1[0])
-        return false;
+        return;
 
     // Dopo aver effettuato tutti i controlli so che la traccia esiste, quindi la creo
 
@@ -323,8 +307,6 @@ bool CalculateTraces(DFN &dfn,
     }
 
     dfn.Traces.push_back(trace);
-
-  return true;
 }
 
 void WriteOutputFiles(const string &outputTracesFile,
@@ -346,7 +328,7 @@ void WriteOutputFiles(const string &outputTracesFile,
         {
             for(unsigned int j = 0; j < 3; j++)
             {
-                if(i != 2 || j != 3)
+                if(i != 1 || j != 2)
                     tracesFile << trace.EndpointsCoordinates(i, j) << "; ";
             }
         }
@@ -374,9 +356,42 @@ void WriteOutputFiles(const string &outputTracesFile,
         {
             tipsFile << t.Id << "; false; " << t.Length << endl;
         }
+
+        tipsFile << endl;
     }
 
     tipsFile.close();
 }
 
+bool ReadDFN(const string &fileName,
+             DFN &dfn,
+             const double &tol)
+{
+    if(!ImportFracture(fileName,
+                        dfn))
+        return false;
+
+    unsigned int traceId = 0;
+
+    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
+    {
+        for(unsigned int j = 0; j < dfn.NumberFractures; j++)
+        {
+            if(i < j)
+            {
+                CalculateTraces(dfn, dfn.Fractures[i], dfn.Fractures[j], traceId, tol);
+            }
+        }
+    }
+
+    dfn.NumberTraces = traceId;
+
+    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
+    {
+        sort(dfn.Fractures[i].nTraces.begin(), dfn.Fractures[i].nTraces.end(), CompareTraces);
+        sort(dfn.Fractures[i].pTraces.begin(), dfn.Fractures[i].pTraces.end(), CompareTraces);
+    }
+
+    return true;
+}
 }

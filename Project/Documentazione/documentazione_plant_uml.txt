@@ -1,0 +1,39 @@
+@startuml
+package DFNLibrary <<Folder>>
+{
+class DFN
+{
++ NumberFractures : unsigned int
++ Fractures : vector<Fracture>
++ NumberTraces : unsigned int
++ Traces : vector<Trace>
+}
+
+class Fracture
+{
++ Id : unsigned int
++ NumberVertices : unsigned int
++ VerticesCoordinates : MatrixXd
++ Barycentre : Vector3d
++ npTraces : vector<Trace>
++ pTraces : vector<Trace> 
++ Tips : map<unsigned int, bool> 
+}
+
+class Trace
+{
++ Id : unsigned int
++ FracturesIds : Vector2i
++ EndpointsCoordinates : MatrixXd
++ Length double
+}
+
+}
+
+DFN "many" --o "1" Fracture : is made up
+DFN "many" --o "1" Trace : is made up
+Fracture "many" --o "2" Trace : is made up
+
+
+
+@enduml

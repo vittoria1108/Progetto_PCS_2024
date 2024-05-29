@@ -1,4 +1,4 @@
-list(APPEND src_test_headers ${CMAKE_CURRENT_SOURCE_DIR}/dfn_test.hpp)
+list(APPEND src_test_headers ${CMAKE_CURRENT_SOURCE_DIR}/TestDFN.hpp)
 
 list(APPEND src_test_includes ${CMAKE_CURRENT_SOURCE_DIR})
 

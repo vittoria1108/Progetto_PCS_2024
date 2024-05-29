@@ -44,6 +44,11 @@ list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_includes})
 
+add_subdirectory(src_test)
+list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_test_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_test_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_test_includes})
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 # Create executable
 ################################################################################

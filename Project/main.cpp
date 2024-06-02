@@ -18,7 +18,9 @@ int main(int argc, char ** argv)
     istringstream str(argv[1]);
     string name;
     str >> name;
-    string fileName = "./DFN/"  + name + ".txt";
+    // string fileName = "./DFN/"  + name + ".txt";
+
+    string fileName = "C:/Users/user/OneDrive/Desktop/Progetto_PCS_2024/Project/src_test/TEST_data.txt";
 
     double tol = 10 * numeric_limits<double>::epsilon(); //tolleranza di default
 

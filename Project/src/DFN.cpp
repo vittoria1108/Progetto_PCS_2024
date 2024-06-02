@@ -188,7 +188,15 @@ void CalculateTraces(DFN &dfn,
     double squareLength = CalculateSquareDistance(endPoints.row(0), endPoints.row(1));
     trace.Length = sqrt(squareLength);
 
-    if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
+    if(abs(beta_1[0] - beta_2[0]) < tol && abs(beta_1[1] - beta_2[1]) < tol)
+    {
+        f1.Tips[trace.Id] = false;
+        f1.pTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = false;
+        f2.pTraces.push_back(trace);
+    }
+    else if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
     {
         f1.Tips[trace.Id] = false;
         f1.pTraces.push_back(trace);
@@ -200,14 +208,6 @@ void CalculateTraces(DFN &dfn,
     {
         f1.Tips[trace.Id] = true;
         f1.nTraces.push_back(trace);
-
-        f2.Tips[trace.Id] = false;
-        f2.pTraces.push_back(trace);
-    }
-    else if(beta_1[0] == beta_2[0] && beta_1[1] == beta_2[1])
-    {
-        f1.Tips[trace.Id] = false;
-        f1.pTraces.push_back(trace);
 
         f2.Tips[trace.Id] = false;
         f2.pTraces.push_back(trace);

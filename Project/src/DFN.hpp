@@ -90,7 +90,7 @@ struct Fracture{
             {
                 double alpha = (((p_r - p_s).cross(t_r)).dot(prod)) / (prod.dot(prod));
 
-                if(alpha > 0 && alpha < 1)
+                if(alpha >= 0 && alpha < 1)
                 {
                     double betaTemp = (((p_s - p_r).cross(t_s)).dot(-prod)) / (prod.dot(prod));
                     beta[counter++] = betaTemp;
@@ -104,14 +104,10 @@ struct Fracture{
             }
             else
             {
-                const double beta0 = (p_s[0] - p_r[0]) / t_r[0];
-                const double beta1 = (p_s[1] - p_r[1]) / t_r[1];
-                const double beta2 = (p_s[2] - p_r[2]) / t_r[2];
-
-                if(abs(beta0 - beta1) < tol &&
-                    abs(beta0 - beta2) < tol)
+                if(abs((p_s[0] - p_r[0]) * t_r[1] - (p_s[1] - p_r[1]) * t_r[0]) < tol &&
+                    abs((p_s[0] - p_r[0]) * t_r[2] - (p_s[2] - p_r[2]) * t_r[0]) < tol)
                 {
-                    beta[counter++] = beta0;
+                    beta[counter++] = (p_s[0] - p_r[0]) / t_r[0];
 
                     if(counter == 2)
                     {

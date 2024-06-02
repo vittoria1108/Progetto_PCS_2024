@@ -1,0 +1,8 @@
+# Number of Fractures
+1
+# FractureId; NumVertices
+0; 5
+# Vertices
+2; 4; 6.5; 0.97; -0.6
+2; 2; 3.8; 5.73; 3.9
+0; 0; 1; 2.07; 1.05

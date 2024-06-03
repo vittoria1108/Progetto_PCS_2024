@@ -136,26 +136,31 @@ void CalculateTraces(DFN &dfn,
     Vector3d p_r;
     Vector3d t_r;
 
-    if(!FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
-        return;
-
-    // Controllo se la retta interseca le figure
-
     Vector2d beta_1 = {};
-
-    if(!f1.IntersectsLine(p_r, t_r, beta_1, tol))
-        return;
-
     Vector2d beta_2 = {};
 
-    if(!f2.IntersectsLine(p_r, t_r, beta_2, tol))
-        return;
+    if(FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
+    {
+        // Controllo se la retta interseca le figure
 
-    if(beta_1[1] < beta_2[0])
-        return;
+        if(!f1.IntersectsLine(p_r, t_r, beta_1, tol))
+            return;
 
-    if(beta_2[1] < beta_1[0])
-        return;
+        if(!f2.IntersectsLine(p_r, t_r, beta_2, tol))
+            return;
+
+        if(beta_1[1] < beta_2[0])
+            return;
+
+        if(beta_2[1] < beta_1[0])
+            return;
+    }
+    else
+    {
+        if(!f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+            return;
+    }
+
 
     // Dopo aver effettuato tutti i controlli so che la traccia esiste, quindi la creo
 

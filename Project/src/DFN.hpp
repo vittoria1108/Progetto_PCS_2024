@@ -158,6 +158,70 @@ struct Fracture{
 
         return false;
     }
+
+    bool IntersectsEdges(Fracture &f,
+                        Vector2d &beta_1,
+                        Vector2d &beta_2,
+                        Vector3d &p_r,
+                        Vector3d &t_r,
+                        const double tol)
+    {
+        for(unsigned int i = 0; i < NumberVertices; i++)
+        {
+            unsigned int index = 0;
+
+            unsigned int next1 = i == NumberVertices - 1 ? 0 : i + 1;
+
+            // AB -> Lato prima frattura
+            Vector3d A = VerticesCoordinates.col(i);
+            Vector3d B = VerticesCoordinates.col(next1);
+
+            Vector3d line1 = B - A;
+
+            p_r = A;
+            t_r = line1;
+
+            for(unsigned int k = 0; k < 3; k++)
+            {
+                if(abs(t_r[k]) > tol)
+                {
+                    index = k;
+                    break;
+                }
+            }
+
+            line1 /= line1.norm();
+
+            for(unsigned int j = 0; j < f.NumberVertices; j++)
+            {
+                unsigned int next2 = j == f.NumberVertices - 1 ? 0 : j + 1;
+
+                // CD -> Lato seconda frattura
+                Vector3d C = f.VerticesCoordinates.col(j);
+                Vector3d D = f.VerticesCoordinates.col(next2);
+
+                Vector3d line2 = C - D;
+                line2 /= line2.norm();
+
+                if(abs(line1[0] - line2[0]) < tol &&
+                    abs(line1[1] - line2[1]) < tol &&
+                    abs(line1[2] - line2[2]) < tol)
+                {
+                    beta_1[0] = (A[index] - p_r[index]) / t_r[index];
+                    beta_1[1] = (B[index] - p_r[index]) / t_r[index];
+                    beta_2[0] = (C[index] - p_r[index]) / t_r[index];
+                    beta_2[1] = (D[index] - p_r[index]) / t_r[index];
+
+                    sort(beta_1.begin(), beta_1.end());
+                    sort(beta_2.begin(), beta_2.end());
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
 };
 
 struct DFN{

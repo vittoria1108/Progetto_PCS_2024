@@ -317,11 +317,107 @@ TEST(DFNTEST, TestImportFracture){
     }
 }
 
-/* TODO: Test CalculateTraces -> 1) Passare due fratture che non si intersecano
- *                               2) Passare due fratture che generano traccia passante
- *                               3) Passare due fratture che generano traccia non passante
-                                 4) (forse, in caso anche da modificare metodo) Passare fratture nello stesso piano con lato coincidente */
+//****************************************************************
+TEST(DFNTEST, CalculateTracesSamePlane){
 
+    double tol = 1e-04;
+
+    DFN dfn;
+    dfn.NumberFractures = 2;
+
+    Fracture f1;
+    f1.Id = 0;
+    f1.NumberVertices = 4;
+
+    MatrixXd f1Vertices(3,4);
+    f1Vertices << -4.46, 7.87, 8.3, 2.49,
+                  -6.7, -49, -17.41, 4.3,
+                  0, 0, 0, 0;
+    f1.VerticesCoordinates = f1Vertices;
+
+    Fracture f2;
+    f2.Id = 1;
+    f2.NumberVertices = 3;
+
+    MatrixXd f2Vertices(3, 3);
+    f2Vertices << 19.86, -16.89, -51.13,
+                  -90.13, 35.94, -65.07,
+                  0, 0, 0;
+    f2.VerticesCoordinates = f2Vertices;
+
+    dfn.Fractures.push_back(f1);
+    dfn.Fractures.push_back(f2);
+
+    unsigned int id = 0;
+    Vector2i fracturesIds = {0, 1};
+    MatrixXd endpointsCoordinates(2, 3);
+    endpointsCoordinates << -4.46, -6.7, 0,
+                            7.87, -49, 0;
+    double length = 44.06;
+
+    CalculateTraces(dfn, f1, f2, id, tol);
+
+    Trace t = dfn.Traces[0];
+
+    EXPECT_EQ(t.Id, 0);
+
+    for(unsigned int i = 0; i < 2; i++)
+    {
+        EXPECT_EQ(t.FracturesIds[i], fracturesIds[i]);
+    }
+
+    for(unsigned int i = 0; i < 2; i++)
+    {
+        for(unsigned int j = 0; j < 3; j++)
+        {
+            EXPECT_NEAR(t.EndpointsCoordinates(i,j), endpointsCoordinates(i,j), 0.1);
+        }
+    }
+
+    EXPECT_NEAR(t.Length, length, 0.1);
+
+    EXPECT_FALSE(f1.Tips[t.Id]);
+    EXPECT_TRUE(f2.Tips[t.Id]);
+}
+
+TEST(DFNTEST, CalculateTracesFalse){
+
+    double tol = 10 * numeric_limits<double>::epsilon();
+
+    DFN dfn;
+    dfn.NumberFractures = 2;
+
+    Fracture f1;
+    f1.Id = 0;
+    f1.NumberVertices = 4;
+
+    MatrixXd f1Vertices(3,4);
+    f1Vertices << 9.5, 8, -4.94, 5,
+                  1.1, -7, -6.56, 5,
+                  -6, -3.2, 5, -4;
+    f1.VerticesCoordinates = f1Vertices;
+
+    Fracture f2;
+    f2.Id = 1;
+    f2.NumberVertices = 4;
+
+    MatrixXd f2Vertices(3, 4);
+    f2Vertices << 26, 3.88, 6.49, 20,
+        50.2, 71.57, 76.7, 60.7,
+        1, 0, 9.51, 6.5;
+    f2.VerticesCoordinates = f2Vertices;
+
+    dfn.Fractures.push_back(f1);
+    dfn.Fractures.push_back(f2);
+
+    unsigned int id = 0;
+
+    CalculateTraces(dfn, f1, f2, id, tol);
+
+    size_t n = dfn.Traces.size();
+
+    EXPECT_EQ(n, 0);
+}
 }
 
 #endif

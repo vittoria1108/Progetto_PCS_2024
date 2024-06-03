@@ -47,8 +47,8 @@ bool FindIntersectionLine(const Vector4d &plane1,
     return true;
 }
 
-inline bool CompareTraces(const Trace &t1,
-                          const Trace &t2)
+bool CompareTraces(const Trace &t1,
+                   const Trace &t2)
 {
     return t1.Length > t2.Length;
 }

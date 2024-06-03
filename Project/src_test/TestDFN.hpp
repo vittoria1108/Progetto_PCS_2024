@@ -113,7 +113,6 @@ TEST(DFNTEST, TestIntersectionTrue){
     bool intersection = f.IntersectsLine(p_r, t_r, beta, tol);
 
     EXPECT_TRUE(intersection);
-
 }
 
 TEST(DFNTEST, TestIntersectionVerticeFalse){
@@ -162,7 +161,6 @@ TEST(DFNTEST, TestIntersectionFalse){
     bool intersection = f.IntersectsLine(p_r, t_r, beta, tol);
 
     EXPECT_FALSE(intersection);
-
 }
 
 //****************************************************************
@@ -318,6 +316,11 @@ TEST(DFNTEST, TestImportFracture){
         EXPECT_NEAR(dfn.Fractures[0].Barycentre[i], barycentre[i], 0.1);
     }
 }
+
+/* TODO: Test CalculateTraces -> 1) Passare due fratture che non si intersecano
+ *                               2) Passare due fratture che generano traccia passante
+ *                               3) Passare due fratture che generano traccia non passante
+                                 4) (forse, in caso anche da modificare metodo) Passare fratture nello stesso piano con lato coincidente */
 
 }
 

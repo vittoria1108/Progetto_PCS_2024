@@ -74,10 +74,10 @@ struct Fracture{
         {
             unsigned int next; //per tenere conto anche dell'ultimo lato
 
-            if (i == (NumberVertices -1))
+            if (i == (NumberVertices - 1))
                 next = 0;
             else
-                next = i+1;
+                next = i + 1;
 
             /* segmento s: Ps + alfa*ts
            retta    r: Pr + beta*tr */
@@ -104,10 +104,48 @@ struct Fracture{
             }
             else
             {
-                if(abs((p_s[0] - p_r[0]) * t_r[1] - (p_s[1] - p_r[1]) * t_r[0]) < tol &&
-                    abs((p_s[0] - p_r[0]) * t_r[2] - (p_s[2] - p_r[2]) * t_r[0]) < tol)
+                bool sameLine = true;
+                vector<unsigned int> indexBeta;
+                double betaTemp = 0;
+                double oldBeta = 0;
+
+                // Se t_r[j] != 0 salvo l'indice, altrimenti controllo che p_s[j] == p_r[j]
+                for(unsigned int j = 0; j < 3; j++)
                 {
-                    beta[counter++] = (p_s[0] - p_r[0]) / t_r[0];
+                    if(abs(t_r[j]) > tol)
+                    {
+                        indexBeta.push_back(j);
+                    }
+                    else if(abs(p_s[j] - p_r[j]) > tol)
+                    {
+                        sameLine = false;
+                    }
+                }
+
+                /* Se le coordinate dei punti sono uguali quando non riesco a calcolare le beta,
+                    controllo che le beta calcolabili siano uguali*/
+                if(sameLine)
+                {
+                    unsigned int numBeta = indexBeta.size() - 1;
+                    oldBeta = (p_s[numBeta] - p_r[numBeta]) / t_r[numBeta];;
+
+                    for(unsigned int j = 0; j < numBeta; j++)
+                    {
+                        betaTemp = (p_s[j] - p_r[j]) / t_r[j];
+
+                        if(abs(betaTemp - oldBeta) > tol)
+                        {
+                            sameLine = false;
+                            break;
+                        }
+
+                        oldBeta = betaTemp;
+                    }
+                }
+
+                if(sameLine)
+                {
+                    beta[counter++] = betaTemp;
 
                     if(counter == 2)
                     {

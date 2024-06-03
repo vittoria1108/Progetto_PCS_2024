@@ -14,7 +14,7 @@ bool CompareTraces(const Trace &t1,
 
 // funzione per importare il file dei dati
 bool ImportFracture(const string &fileName,
-                DFN& dfn);
+                    DFN& dfn);
 
 
 // funzione che calcola il piano
@@ -22,8 +22,8 @@ Vector4d CalculatePlane(const Fracture& fracture);
 
 
 // calcola la distanza fra due punti
-double CalculateDistance(const Vector3d point1,
-                         const Vector3d point2);
+double CalculateSquareDistance(const Vector3d point1,
+                              const Vector3d point2);
 
 
 // calcola i raggi delle fratture

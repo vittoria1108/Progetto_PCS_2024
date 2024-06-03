@@ -93,10 +93,10 @@ Vector4d CalculatePlane(const Fracture& fracture)
 }
 
 
-double CalculateDistance(const Vector3d point1,
-                         const Vector3d point2)
+double CalculateSquareDistance(const Vector3d point1,
+                               const Vector3d point2)
 {
-    double result = sqrt((point1-point2).transpose() * (point1-point2));   // distanza fra due punti in norma euclidea
+    double result = ((point1-point2).transpose() * (point1-point2));   // distanza fra due punti in norma euclidea
 
     return result;
 }
@@ -107,13 +107,13 @@ double CalculateR(const Fracture &f)
     double r = 0;
     for(unsigned int i = 0; i < f.NumberVertices; i++)
     {
-        double newR = CalculateDistance(f.Barycentre, f.VerticesCoordinates.col(i));   // distanza fra il baricentro e tutti i vertici
+        double newR = CalculateSquareDistance(f.Barycentre, f.VerticesCoordinates.col(i));   // distanza fra il baricentro e tutti i vertici
 
         if(newR > r)
             r = newR;    // come raggio considero la distanza maggiore
     }
 
-    return r;
+    return sqrt(r);
 }
 
 
@@ -180,7 +180,7 @@ bool IntersectionFractureLine(const Fracture &f,
             double alpha = ((p_r-p_s).cross(t_r)).dot(prod)/(prod.dot(prod));
             // cout << fixed << setprecision(4) << "alpha1 " << alpha << endl;
 
-            if(alpha > 0 && alpha < 1)   // combinazione convessa: se alpha sta tra 0 e 1 il segmento interseca effettivamente la retta t_r
+            if(alpha >= 0 && alpha < 1)   // combinazione convessa: se alpha sta tra 0 e 1 il segmento interseca effettivamente la retta t_r
             {
                 double betaTemp = ((p_s-p_r).cross(t_s)).dot(-prod)/(prod.dot(prod));
                 beta[counter] = betaTemp;
@@ -193,17 +193,58 @@ bool IntersectionFractureLine(const Fracture &f,
                 }
             }
         }
-        else if((abs((p_s[0]-p_r[0]) / t_r[0] - (p_s[1] - p_r[1]) / t_r[1])) < tol && abs(((p_s[0]-p_r[0]) / t_r[0] - (p_s[2] - p_r[2] / t_r[2]))))
+        else
         {
-            double betaTemp = ((p_s-p_r).dot(t_r))/(t_r.dot(t_r));
-            beta[counter] = betaTemp;
+            bool sameLine = true;
+            vector<unsigned int> indexBeta;
+            double betaTemp = 0;
+            double oldBeta = 0;
 
-            counter++;
+            // Se t_r[j] != 0 salvo l'indice, altrimenti controllo che p_s[j] == p_r[j]
 
-            if(counter==2)  // perché ho già trovato i due punti di intersezione
+            for(unsigned int j = 0; j < 3; j++)
             {
-                sort(beta.begin(), beta.end());
-                return true;
+                if(abs(t_r[j]) > tol)
+                {
+                    indexBeta.push_back(j);
+                }
+                else if(abs(p_s[j] - p_r[j]) > tol)
+                {
+                    sameLine = false;
+                }
+            }
+
+            /* Se le coordinate dei punti sono uguali quando non riesco a calcolare le beta,
+               controllo che le beta calcolabili siano uguali*/
+
+            if(sameLine)
+            {
+                unsigned int numBeta = indexBeta.size() - 1;
+                oldBeta = (p_s[numBeta] - p_r[numBeta]) / t_r[numBeta];;
+
+                for(unsigned int j = 0; j < numBeta; j++)
+                {
+                    betaTemp = (p_s[j] - p_r[j]) / t_r[j];
+
+                    if(abs(betaTemp - oldBeta) > tol)
+                    {
+                        sameLine = false;
+                        break;
+                    }
+
+                    oldBeta = betaTemp;
+                }
+            }
+
+            if(sameLine)
+            {
+                beta[counter++] = betaTemp;
+
+                if(counter == 2)
+                {
+                    sort(beta.begin(), beta.end());
+                    return true;
+                }
             }
         }
     }
@@ -223,8 +264,8 @@ void CalculateTraces(DFN &dfn,
     double r1 = CalculateR(f1);
     double r2 = CalculateR(f2);
 
-    double barDistance = CalculateDistance(f1.Barycentre, f2.Barycentre);
-    if(barDistance - (r1+r2) > tol)       // le due fratture non si intersecano
+    double barDistance = CalculateSquareDistance(f1.Barycentre, f2.Barycentre);
+    if(barDistance - (r1*r1+r2*r2) > tol)       // le due fratture non si intersecano
         return;
 
 
@@ -287,31 +328,31 @@ void CalculateTraces(DFN &dfn,
     trace.EndpointsCoordinates = endPoints;
 
 
-    double length = CalculateDistance(endPoints.row(0), endPoints.row(1));
-    trace.Length = length;
+    double squareLength = CalculateSquareDistance(endPoints.row(0), endPoints.row(1));
+    trace.Length = sqrt(squareLength);
 
 
     // passanti e non passanti
-    if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
+    if(abs(beta_1[0] - beta_2[0]) < tol && abs(beta_1[1] - beta_2[1]) < tol)
     {
         f1.Tips[trace.Id] = false;      // passante = false
         f1.pTraces.push_back(trace);
 
-        f2.Tips[trace.Id] = true;     // non passante = true
+        f2.Tips[trace.Id] = false;
+        f2.pTraces.push_back(trace);
+    }
+    else if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
+    {
+        f1.Tips[trace.Id] = false;
+        f1.pTraces.push_back(trace);
+
+        f2.Tips[trace.Id] = true;       // non passante = true
         f2.npTraces.push_back(trace);
     }
     else if(beta_2[0] > beta_1[0] && beta_2[1] < beta_1[1])
     {
         f1.Tips[trace.Id] = true;
         f1.npTraces.push_back(trace);
-
-        f2.Tips[trace.Id] = false;
-        f2.pTraces.push_back(trace);
-    }
-    else if(beta_1[0] == beta_2[0] && beta_1[1] == beta_2[1])
-    {
-        f1.Tips[trace.Id] = false;
-        f1.pTraces.push_back(trace);
 
         f2.Tips[trace.Id] = false;
         f2.pTraces.push_back(trace);

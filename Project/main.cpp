@@ -21,7 +21,7 @@ int main(int argc, char ** argv)
     string fileName = "./DFN/"  + name + ".txt";
 
     double tol = 10 * numeric_limits<double>::epsilon();   //tolleranza di default
-    if(argc == 3)//se viene inserita in command line la tolleranza
+    if(argc == 3)  //se viene inserita in command line la tolleranza
     {
         istringstream conv(argv[2]);
         double tol_input;

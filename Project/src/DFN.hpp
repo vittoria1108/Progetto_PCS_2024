@@ -4,14 +4,13 @@
 #include <iostream>
 #include <Eigen/Eigen>
 
-
 using namespace std;
 using namespace Eigen;
 
 
-namespace FractureLibrary{
+namespace DFNLibrary{
 
-struct Trace{
+struct Trace{ //struct con gli attributi di ogni traccia del dfn
     unsigned int Id = 0;
     Vector2i FracturesIds ={};
     MatrixXd EndpointsCoordinates = {};

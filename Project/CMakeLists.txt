@@ -44,6 +44,15 @@ list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_includes})
 
+add_subdirectory(src_test)
+list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_test_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_test_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_test_includes})
+
+add_subdirectory(src_mesh)
+list(APPEND ${CMAKE_PROJECT_NAME}_mesh_sources ${src_mesh_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_mesh_headers ${src_mesh_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_mesh_includes ${src_mesh_includes})
 # File
 ###############################################################################
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -55,6 +64,18 @@ add_executable(${CMAKE_PROJECT_NAME}
     ${${CMAKE_PROJECT_NAME}_sources}
     ${${CMAKE_PROJECT_NAME}_headers})
 
+add_executable(PolygonalMesh
+    main.cpp
+    ${${CMAKE_PROJECT_NAME}_sources}
+    ${${CMAKE_PROJECT_NAME}_headers}
+    ${${CMAKE_PROJECT_NAME}_mesh_headers}
+    ${${CMAKE_PROJECT_NAME}_mesh_sources})
+
 target_link_libraries(${PROJECT_NAME} ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${${CMAKE_PROJECT_NAME}_includes})
 target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
+
+
+target_include_directories(PolygonalMesh PRIVATE ${${CMAKE_PROJECT_NAME}_includes} ${${CMAKE_PROJECT_NAME}_mesh_includes})
+target_link_libraries(PolygonalMesh ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
+target_compile_options(PolygonalMesh PUBLIC -fPIC)

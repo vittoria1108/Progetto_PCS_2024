@@ -6,14 +6,17 @@
 
 using namespace std;
 
-namespace FractureLibrary{
+namespace DFNLibrary{
 
 bool CompareTraces(const Trace &t1,
                    const Trace &t2);
 
-bool ImportFracture(const string& filename,
-                    DFN& dfn,
-                    const double &tol);
+bool ReadDFN(const string &fileName,
+             DFN &dfn,
+             const double &tol);
+
+bool ImportFracture(const string &fileName,
+                    DFN &dfn);
 
 Vector4d CalculatePlane(const Fracture& f);
 

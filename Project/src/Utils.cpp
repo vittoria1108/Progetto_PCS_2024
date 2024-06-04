@@ -10,7 +10,7 @@ using namespace std;
 using namespace Eigen;
 
 
-namespace FractureLibrary{
+namespace DFNLibrary{
 
 bool CompareTraces(const Trace &t1,
                    const Trace &t2)
@@ -19,14 +19,15 @@ bool CompareTraces(const Trace &t1,
 }
 
 bool ImportFracture(const string &fileName,
-                    DFN &dfn,
-                    const double &tol)
+                    DFN &dfn)
 {
-
     ifstream file(fileName);
 
     if(file.fail())
+    {
+        cerr << "Input file not found";
         return false;
+    }
 
     string header;
     string line;
@@ -70,6 +71,17 @@ bool ImportFracture(const string &fileName,
         Vector3d barycentre = dfn.Fractures[i].VerticesCoordinates.rowwise().mean();
         dfn.Fractures[i].Barycentre = barycentre;
     }
+    file.close();
+    return true;
+}
+
+bool ReadDFN(const string &fileName,
+                 DFN &dfn,
+                 const double &tol)
+{
+
+    if(!ImportFracture(fileName, dfn))
+        return false;
 
     unsigned int traceId = 0;
 
@@ -91,8 +103,6 @@ bool ImportFracture(const string &fileName,
         sort(dfn.Fractures[i].nTraces.begin(), dfn.Fractures[i].nTraces.end(), CompareTraces);
         sort(dfn.Fractures[i].pTraces.begin(), dfn.Fractures[i].pTraces.end(), CompareTraces);
     }
-
-    file.close();
 
     return true;
 

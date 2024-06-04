@@ -1,12 +1,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "Utils.hpp"
-#include "DFN.hpp"
-
+#include "src/Utils.hpp"
+#include "src/DFN.hpp"
+#include "src_mesh/PolygonalMesh.hpp"
 
 using namespace std;
-using namespace FractureLibrary;
+using namespace Eigen;
+using namespace DFNLibrary;
+using namespace PolygonalLibrary;
 
 
 int main(int argc, char **argv)
@@ -29,9 +31,9 @@ int main(int argc, char **argv)
     }
 
      string filename = "./DFN/" + name +".txt";
-    if(!ImportFracture(filename,
-                        dfn,
-                        tol))
+    if(!ReadDFN(filename,
+                dfn,
+                tol))
     {
         return 2;
     }
@@ -42,6 +44,10 @@ int main(int argc, char **argv)
     WriteOutputFiles(outputTracesFile,
                      outputTipsFile,
                      dfn);
+    /*
+    PolygonalMesh PM;
+    ImportMesh(PM , dfn.Fractures[1]);
+    */
 
     return 0;
 }

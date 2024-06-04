@@ -114,6 +114,22 @@ bool ImportFracture(const string &fileName,
     return true;
 }
 
+bool SamePlane(Vector4d plane1,
+               Vector4d plane2,
+               const double tol)
+{
+    plane1 /= plane1.norm();
+    plane2 /= plane2.norm();
+
+    for(unsigned int i = 0; i < 4; i++)
+    {
+        if(abs(plane1[i] - plane2[i]) > tol)
+            return false;
+    }
+
+    return true;
+}
+
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,
                      Fracture &f2,
@@ -133,6 +149,7 @@ void CalculateTraces(DFN &dfn,
     // Controllo che i piani contenenti i due poligoni non siano paralleli
     Vector4d plane1 = f1.CalculatePlane();
     Vector4d plane2 = f2.CalculatePlane();
+
     Vector3d p_r;
     Vector3d t_r;
 
@@ -157,7 +174,7 @@ void CalculateTraces(DFN &dfn,
     }
     else
     {
-        if(!f1.SamePlane(f2, tol) || !f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+        if(!SamePlane(plane1, plane2, tol) || !f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
             return;
     }
 
@@ -294,10 +311,13 @@ void WriteOutputFiles(const string &outputTracesFile,
 
     for(const Fracture &f : dfn.Fractures)
     {
-        tipsFile << "# FractureId; NumTraces" << endl;
-        tipsFile << f.Id << "; " << f.pTraces.size() + f.nTraces.size() << endl;
+        unsigned int totalSize = f.pTraces.size() + f.nTraces.size();
 
-        tipsFile << "# TraceId; Tips; Length" << endl;
+        tipsFile << "# FractureId; NumTraces" << endl;
+        tipsFile << f.Id << "; " << totalSize << endl;
+
+        if(totalSize != 0)
+            tipsFile << "# TraceId; Tips; Length" << endl;
 
         for(const Trace &t : f.nTraces)
         {

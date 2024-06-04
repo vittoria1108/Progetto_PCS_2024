@@ -159,6 +159,24 @@ struct Fracture{
         return false;
     }
 
+    bool SamePlane(Fracture &f,
+                   const double tol)
+    {
+        Vector4d plane1 = CalculatePlane();
+        Vector4d plane2 = f.CalculatePlane();
+
+        plane1 /= plane1.norm();
+        plane2 /= plane2.norm();
+
+        for(unsigned int i = 0; i < 4; i++)
+        {
+            if(abs(plane1[i] - plane2[i]) > tol)
+                return false;
+        }
+
+        return true;
+    }
+
     bool IntersectsEdges(Fracture &f,
                         Vector2d &beta_1,
                         Vector2d &beta_2,

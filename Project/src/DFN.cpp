@@ -157,7 +157,7 @@ void CalculateTraces(DFN &dfn,
     }
     else
     {
-        if(!f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+        if(!f1.SamePlane(f2, tol) || !f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
             return;
     }
 

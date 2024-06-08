@@ -2,10 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include "DFN.hpp"
+#include "src_mesh/PolygonalMesh.hpp"
 
 
 using namespace std;
 using namespace FractureLibrary;
+using namespace PolygonalLibrary;
 
 
 int main(int argc, char ** argv)
@@ -43,6 +45,9 @@ int main(int argc, char ** argv)
     WriteOutputFiles(outputTracesFile,
                      outputTipsFile,
                      dfn);
+
+    PolygonalMesh PM;
+    ImportMesh(PM, dfn.Fractures[1], tol);
 
     return 0;
 }

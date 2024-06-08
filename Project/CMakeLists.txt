@@ -49,20 +49,33 @@ list(APPEND ${CMAKE_PROJECT_NAME}_TEST_sources ${src_test_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_TEST_headers ${src_test_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_TEST_includes ${src_test_includes})
 
+add_subdirectory(src_mesh)
+list(APPEND ${CMAKE_PROJECT_NAME}_MESH_sources ${src_mesh_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_MESH_headers ${src_mesh_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_MESH_includes ${src_mesh_includes})
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Create executable
 ################################################################################
-add_executable(${PROJECT_NAME}
-	main.cpp
+add_executable(${PROJECT_NAME} main.cpp
         ${${CMAKE_PROJECT_NAME}_sources}
-        ${${CMAKE_PROJECT_NAME}_headers})
+        ${${CMAKE_PROJECT_NAME}_headers}
+        ${${CMAKE_PROJECT_NAME}_MESH_sources}
+        ${${CMAKE_PROJECT_NAME}_MESH_headers})
+
+add_executable(${CMAKE_PROJECT_NAME}_MESH
+              ${${CMAKE_PROJECT_NAME}_sources}
+              ${${CMAKE_PROJECT_NAME}_headers}
+              ${${CMAKE_PROJECT_NAME}_MESH_sources}
+              ${${CMAKE_PROJECT_NAME}_MESH_headers})
 
 add_executable(${CMAKE_PROJECT_NAME}_TEST main_test.cpp 
 	       ${${CMAKE_PROJECT_NAME}_sources} 
 	       ${${CMAKE_PROJECT_NAME}_headers} 
 	       ${${CMAKE_PROJECT_NAME}_TEST_headers} 
 	       ${${CMAKE_PROJECT_NAME}_TEST_sources})
+
 
 target_link_libraries(${PROJECT_NAME} ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${${CMAKE_PROJECT_NAME}_includes})
@@ -71,3 +84,7 @@ target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
 target_include_directories(${CMAKE_PROJECT_NAME}_TEST PRIVATE ${${CMAKE_PROJECT_NAME}_includes} ${${CMAKE_PROJECT_NAME}_TEST_includes})
 target_link_libraries(${CMAKE_PROJECT_NAME}_TEST ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
 target_compile_options(${CMAKE_PROJECT_NAME}_TEST PUBLIC -fPIC)
+
+target_include_directories(${CMAKE_PROJECT_NAME}_MESH PRIVATE ${${CMAKE_PROJECT_NAME}_includes} ${${CMAKE_PROJECT_NAME}_MESH_includes})
+target_link_libraries(${CMAKE_PROJECT_NAME}_MESH ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
+target_compile_options(${CMAKE_PROJECT_NAME}_MESH PUBLIC -fPIC)

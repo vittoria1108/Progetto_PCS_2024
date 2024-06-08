@@ -110,7 +110,9 @@ TEST(DFNTEST, TestIntersectionTrue){
 
     Vector2d beta;
 
-    bool intersection = f.IntersectsLine(p_r, t_r, beta, tol);
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_TRUE(intersection);
 }
@@ -134,7 +136,9 @@ TEST(DFNTEST, TestIntersectionVerticeFalse){
 
     Vector2d beta;
 
-    bool intersection = f.IntersectsLine(p_r, t_r, beta, tol);
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_FALSE(intersection);
 }
@@ -158,7 +162,9 @@ TEST(DFNTEST, TestIntersectionFalse){
 
     Vector2d beta;
 
-    bool intersection = f.IntersectsLine(p_r, t_r, beta, tol);
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_FALSE(intersection);
 }
@@ -320,7 +326,7 @@ TEST(DFNTEST, TestImportFracture){
 //****************************************************************
 TEST(DFNTEST, CalculateTracesSamePlane){
 
-    double tol = 1e-04;
+    double tol = 10e-05;
 
     DFN dfn;
     dfn.NumberFractures = 2;
@@ -422,6 +428,7 @@ TEST(DFNTEST, CalculateTracesFalse){
 TEST(DFNTEST, TestCalculatePTraces){
 
     double tol = 10 * numeric_limits<double>::epsilon();
+
     DFN dfn;
     dfn.NumberFractures = 2;
 
@@ -469,9 +476,9 @@ TEST(DFNTEST, TestCalculatePTraces){
 
     for(unsigned int i = 0; i < 2; i++)
     {
-        for(unsigned int j=0; j<3; j++)
+        for(unsigned int j = 0; j < 3; j++)
         {
-            EXPECT_NEAR(t.EndpointsCoordinates(i,j), endPoints(i,j), 0.5);
+            EXPECT_NEAR(t.EndpointsCoordinates(i, j), endPoints(i, j), 0.5);
         }
     }
 
@@ -485,6 +492,7 @@ TEST(DFNTEST, TestCalculatePTraces){
 TEST(DFNTEST, TestCalculateNpTraces){
 
     double tol = 10 * numeric_limits<double>::epsilon();
+
     DFN dfn;
     dfn.NumberFractures = 2;
 
@@ -530,11 +538,11 @@ TEST(DFNTEST, TestCalculateNpTraces){
         EXPECT_EQ(t.FracturesIds[i], fracturesIds[i]);
     }
 
-    for(unsigned int i=0; i<2; i++)
+    for(unsigned int i = 0; i < 2; i++)
     {
-        for(unsigned int j=0; j<3; j++)
+        for(unsigned int j = 0; j < 3; j++)
         {
-            EXPECT_NEAR(t.EndpointsCoordinates(i,j), endPoints(i,j), 0.5);
+            EXPECT_NEAR(t.EndpointsCoordinates(i, j), endPoints(i, j), 0.5);
         }
     }
 

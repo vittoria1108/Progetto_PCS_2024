@@ -2,6 +2,7 @@
 #include <sstream>
 #include <fstream>
 #include <iomanip>
+#include <cmath>
 #include "DFN.hpp"
 #include "Eigen/Eigen"
 
@@ -143,7 +144,7 @@ void CalculateTraces(DFN &dfn,
 
     double barDistances = CalculateSquareDistance(f1.Barycentre, f2.Barycentre);
 
-    if(barDistances - (r1*r1 + r2*r2) > tol)
+    if(barDistances - ((r1 + r2) * (r1 + r2)) > tol)
         return;
 
     // Controllo che i piani contenenti i due poligoni non siano paralleli
@@ -156,14 +157,19 @@ void CalculateTraces(DFN &dfn,
     Vector2d beta_1 = {};
     Vector2d beta_2 = {};
 
+    map<unsigned int, bool> isOnEdge;
+
+    isOnEdge[f1.Id] = false;
+    isOnEdge[f2.Id] = false;
+
     if(FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
     {
         // Controllo se la retta interseca le figure
 
-        if(!f1.IntersectsLine(p_r, t_r, beta_1, tol))
+        if(!f1.IntersectsLine(p_r, t_r, beta_1, isOnEdge, tol))
             return;
 
-        if(!f2.IntersectsLine(p_r, t_r, beta_2, tol))
+        if(!f2.IntersectsLine(p_r, t_r, beta_2, isOnEdge, tol))
             return;
 
         if(beta_1[1] < beta_2[0])
@@ -174,7 +180,12 @@ void CalculateTraces(DFN &dfn,
     }
     else
     {
-        if(!SamePlane(plane1, plane2, tol) || !f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+        if(SamePlane(plane1, plane2, tol) && f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+        {
+            isOnEdge[f1.Id] = true;
+            isOnEdge[f2.Id] = true;
+        }
+        else
             return;
     }
 
@@ -208,7 +219,13 @@ void CalculateTraces(DFN &dfn,
     trace.EndpointsCoordinates = endPoints;
 
     double squareLength = CalculateSquareDistance(endPoints.row(0), endPoints.row(1));
+
+    if(abs(squareLength) < tol)
+        return;
+
     trace.Length = sqrt(squareLength);
+
+    trace.IsOnEdge = isOnEdge;
 
     if(abs(beta_1[0] - beta_2[0]) < tol && abs(beta_1[1] - beta_2[1]) < tol)
     {

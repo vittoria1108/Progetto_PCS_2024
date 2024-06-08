@@ -21,6 +21,8 @@ struct Trace{
     MatrixXd EndpointsCoordinates = {};
     double Length;
 
+    map<unsigned int, bool> IsOnEdge = {};
+
 };
 
 struct Fracture{
@@ -66,6 +68,7 @@ struct Fracture{
     bool IntersectsLine(const Vector3d &p_r,
                         const Vector3d &t_r,
                         Vector2d &beta,
+                        map<unsigned int, bool> &isOnEdge,
                         const double &tol)
     {
         unsigned int counter = 0;
@@ -145,6 +148,8 @@ struct Fracture{
 
                 if(sameLine)
                 {
+                    isOnEdge[Id] = true;
+
                     beta[counter++] = betaTemp;
 
                     if(counter == 2)
@@ -166,6 +171,7 @@ struct Fracture{
                         Vector3d &t_r,
                         const double tol)
     {
+
         for(unsigned int i = 0; i < NumberVertices; i++)
         {
             unsigned int index = 0;
@@ -218,9 +224,9 @@ struct Fracture{
                     return true;
                 }
             }
-
-            return false;
         }
+
+        return false;
     }
 };
 

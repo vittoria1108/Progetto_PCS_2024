@@ -2,6 +2,7 @@
 #define DFN_HPP
 
 #include <iostream>
+#include <iomanip>
 #include <Eigen/Eigen>
 
 
@@ -49,6 +50,18 @@ struct Fracture{
         Vector4d plane = {normal[0], normal[1], normal[2], d};
 
         return plane;
+    }
+
+    bool IsInPlane(const Vector4d &plane,
+                     const double &tol)
+    {
+        Vector3d point = VerticesCoordinates.col(0);
+        Vector3d normal = {plane[0], plane[1], plane[2]};
+
+        if(abs(point.dot(normal) - plane[3]) < tol)
+            return true;
+
+        return false;
     }
 
     double CalculateR()
@@ -196,33 +209,45 @@ struct Fracture{
                 }
             }
 
-            line1 /= line1.norm();
+            beta_1[0] = (A[index] - p_r[index]) / t_r[index];
+            beta_1[1] = (B[index] - p_r[index]) / t_r[index];
 
             for(unsigned int j = 0; j < f.NumberVertices; j++)
             {
+                bool sameLine = true;
+
                 unsigned int next2 = j == f.NumberVertices - 1 ? 0 : j + 1;
 
                 // CD -> Lato seconda frattura
                 Vector3d C = f.VerticesCoordinates.col(j);
                 Vector3d D = f.VerticesCoordinates.col(next2);
 
-                Vector3d line2 = C - D;
-                line2 /= line2.norm();
+                beta_2[0] = (C[index] - p_r[index]) / t_r[index];
+                beta_2[1] = (D[index] - p_r[index]) / t_r[index];
 
-                if(abs(line1[0] - line2[0]) < tol &&
-                    abs(line1[1] - line2[1]) < tol &&
-                    abs(line1[2] - line2[2]) < tol)
+                for(unsigned int i = 0; i < 3; i++)
                 {
-                    beta_1[0] = (A[index] - p_r[index]) / t_r[index];
-                    beta_1[1] = (B[index] - p_r[index]) / t_r[index];
-                    beta_2[0] = (C[index] - p_r[index]) / t_r[index];
-                    beta_2[1] = (D[index] - p_r[index]) / t_r[index];
+                    if(i == index)
+                        continue;
 
+                    double valueC = p_r[i] + beta_2[0] * t_r[i];
+                    double valueD = p_r[i] + beta_2[1] * t_r[i];
+
+                    if(abs(valueC - C[i]) > tol || abs(valueD - D[i]) > tol)
+                    {
+                        sameLine = false;
+                        break;
+                    }
+                }
+
+                if(sameLine)
+                {
                     sort(beta_1.begin(), beta_1.end());
                     sort(beta_2.begin(), beta_2.end());
 
                     return true;
                 }
+
             }
         }
 
@@ -256,10 +281,6 @@ bool ReadDFN(const string &fileName,
 
 bool ImportFracture(const string &fileName,
                     DFN &dfn);
-
-bool SamePlane(const Vector4d plane1,
-               const Vector4d plane2,
-               const double tol);
 
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,

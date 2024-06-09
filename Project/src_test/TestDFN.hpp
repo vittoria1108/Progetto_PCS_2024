@@ -326,7 +326,7 @@ TEST(DFNTEST, TestImportFracture){
 //****************************************************************
 TEST(DFNTEST, CalculateTracesSamePlane){
 
-    double tol = 10e-05;
+    double tol = 10 * numeric_limits<double>::epsilon();
 
     DFN dfn;
     dfn.NumberFractures = 2;
@@ -347,7 +347,7 @@ TEST(DFNTEST, CalculateTracesSamePlane){
 
     MatrixXd f2Vertices(3, 3);
     f2Vertices << 19.86, -16.89, -51.13,
-        -90.13, 35.94, -65.07,
+        -90.133576642335768, 35.943065693430647, -65.07,
         0, 0, 0;
     f2.VerticesCoordinates = f2Vertices;
 

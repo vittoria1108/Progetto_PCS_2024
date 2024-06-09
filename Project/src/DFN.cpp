@@ -115,22 +115,6 @@ bool ImportFracture(const string &fileName,
     return true;
 }
 
-bool SamePlane(Vector4d plane1,
-               Vector4d plane2,
-               const double tol)
-{
-    plane1 /= plane1.norm();
-    plane2 /= plane2.norm();
-
-    for(unsigned int i = 0; i < 4; i++)
-    {
-        if(abs(plane1[i] - plane2[i]) > tol)
-            return false;
-    }
-
-    return true;
-}
-
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,
                      Fracture &f2,
@@ -180,7 +164,7 @@ void CalculateTraces(DFN &dfn,
     }
     else
     {
-        if(SamePlane(plane1, plane2, tol) && f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
+        if(f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol) && f1.IsInPlane(plane2, tol))
         {
             isOnEdge[f1.Id] = true;
             isOnEdge[f2.Id] = true;

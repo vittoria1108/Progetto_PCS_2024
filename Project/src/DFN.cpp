@@ -164,7 +164,7 @@ void CalculateTraces(DFN &dfn,
     }
     else
     {
-        if(f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol) && f1.IsInPlane(plane2, tol))
+        if(f1.IsInPlane(plane2, tol) && f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
         {
             isOnEdge[f1.Id] = true;
             isOnEdge[f2.Id] = true;

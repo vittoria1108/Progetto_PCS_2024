@@ -14,10 +14,10 @@ namespace PolygonalLibrary{
 
 struct Cell0D {
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
     Vector3d Coordinates = {};
 
-    bool IsBetween(const Cell0D &cell1, const Cell0D &cell2, const double &tol)
+    /*bool IsBetween(const Cell0D &cell1, const Cell0D &cell2, const double &tol)
     {
         Vector3d firstRow = cell1.Coordinates - Coordinates;
         Vector3d secondRow = cell2.Coordinates - Coordinates;
@@ -32,40 +32,24 @@ struct Cell0D {
             return true;
 
         return false;
-    }
+    }*/
 };
 
 struct Cell1D {
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
     Vector2i Vertices = {};
+
     bool IsOld = false;
+    unsigned int CuttedBy = -1;
 
     vector<unsigned int> NearCells2D = {};
-
-    bool IntersectsLine(const Vector3d &p_s, const Vector3d &t_s, const Vector3d &p_r, const Vector3d &t_r, Vector3d &coordinates, const double &tol)
-    {
-        Vector3d prod = t_s.cross(t_r);
-
-        if (prod.norm() > tol)
-        {
-            double alpha = (((p_r - p_s).cross(t_r)).dot(prod)) / (prod.dot(prod));
-
-            if(alpha >= 0 && alpha < 1)
-            {
-                coordinates = p_s + alpha * t_s;
-                return true;
-            }
-        }
-
-        return false;
-    }
 
 };
 
 struct Cell2D {
 
-    unsigned int Id = {};
+    unsigned int Id = -1;
 
     unsigned int NumberVertices = 0;
     vector<unsigned int> Vertices = {};

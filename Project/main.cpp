@@ -46,8 +46,15 @@ int main(int argc, char ** argv)
                      outputTipsFile,
                      dfn);
 
-    PolygonalMesh PM;
-    ImportMesh(PM, dfn.Fractures[1], tol);
+    vector<PolygonalMesh> allPM;
+
+    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
+    {
+        PolygonalMesh PM;
+        ImportMesh(PM, dfn.Fractures[1], tol);
+
+        allPM.push_back(PM);
+    }
 
     return 0;
 }

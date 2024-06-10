@@ -53,7 +53,7 @@ struct Fracture{
     }
 
     bool IsInPlane(const Vector4d &plane,
-                     const double &tol)
+                    const double &tol)
     {
         Vector3d point = VerticesCoordinates.col(0);
         Vector3d normal = {plane[0], plane[1], plane[2]};
@@ -135,6 +135,7 @@ struct Fracture{
                     else if(abs(p_s[j] - p_r[j]) > tol)
                     {
                         sameLine = false;
+                        break;
                     }
                 }
 
@@ -142,10 +143,12 @@ struct Fracture{
                     controllo che le beta calcolabili siano uguali*/
                 if(sameLine)
                 {
-                    unsigned int numBeta = indexBeta.size() - 1;
-                    oldBeta = (p_s[numBeta] - p_r[numBeta]) / t_r[numBeta];;
+                    unsigned int index = indexBeta[0];
+                    oldBeta = (p_s[index] - p_r[index]) / t_r[index];
 
-                    for(unsigned int j = 0; j < numBeta; j++)
+                    indexBeta.erase(indexBeta.begin());
+
+                    for(unsigned int j : indexBeta)
                     {
                         betaTemp = (p_s[j] - p_r[j]) / t_r[j];
 
@@ -182,7 +185,7 @@ struct Fracture{
                         Vector2d &beta_2,
                         Vector3d &p_r,
                         Vector3d &t_r,
-                        const double tol)
+                        const double &tol)
     {
 
         for(unsigned int i = 0; i < NumberVertices; i++)

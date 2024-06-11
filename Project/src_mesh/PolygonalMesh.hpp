@@ -17,22 +17,6 @@ struct Cell0D {
     unsigned int Id = -1;
     Vector3d Coordinates = {};
 
-    /*bool IsBetween(const Cell0D &cell1, const Cell0D &cell2, const double &tol)
-    {
-        Vector3d firstRow = cell1.Coordinates - Coordinates;
-        Vector3d secondRow = cell2.Coordinates - Coordinates;
-
-        MatrixXd matrix(3, 3);
-
-        matrix << firstRow[0], firstRow[1], firstRow[2],
-                  secondRow[0], secondRow[1], secondRow[2],
-                  1, 1, 1;
-
-        if(abs(matrix.determinant()) < tol)
-            return true;
-
-        return false;
-    }*/
 };
 
 struct Cell1D {
@@ -74,7 +58,33 @@ struct PolygonalMesh {
 
 };
 
-void ImportMesh(PolygonalMesh &PM, const Fracture &f, const double &tol);
+bool AlreadyExists(const Vector3d &coordinates,
+                   const PolygonalMesh &PM,
+                   unsigned int &id,
+                   const double &tol);
+
+bool IntersectionCellTrace(const Vector3d &p_s,
+                           const Vector3d &t_s,
+                           const Vector3d &p_r,
+                           const Vector3d &t_r,
+                           Vector3d &coordinates,
+                           const double &tol);
+
+bool IntersectionCellTrace(const Vector3d &p_s,
+                           const Vector3d &t_s,
+                           const Vector3d &p_r,
+                           const Vector3d &t_r,
+                           vector<double> &beta,
+                           Vector3d &coordinates,
+                           const double &tol);
+
+void CreateFirstCell(PolygonalMesh &PM,
+                     const Fracture &f,
+                     unsigned int &idCell2D);
+
+void ImportMesh(PolygonalMesh &PM,
+                const Fracture &f,
+                const double &tol);
 
 }
 

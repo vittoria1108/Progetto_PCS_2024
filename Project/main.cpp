@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
     for(unsigned int i = 0; i < dfn.NumberFractures; i++)
     {
         PolygonalMesh PM;
-        ImportMesh(PM, dfn.Fractures[1], tol);
+        ImportMesh(PM, dfn.Fractures[i], tol);
 
         allPM.push_back(PM);
     }

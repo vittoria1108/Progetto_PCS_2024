@@ -3,8 +3,8 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
-#include "DFN.hpp"
-#include "Eigen/Eigen"
+#include <DFN.hpp>
+#include <Eigen/Eigen>
 
 
 using namespace std;
@@ -13,21 +13,21 @@ using namespace Eigen;
 
 namespace FractureLibrary{
 
-double CalculateSquareDistance(const Vector3d point1,
-                               const Vector3d point2)
+double CalculateSquareDistance(const Eigen::Vector3d point1,
+                               const Eigen::Vector3d point2)
 {
     double result = (point1 - point2).transpose() * (point1 - point2);
     return result;
 }
 
-bool FindIntersectionLine(const Vector4d &plane1,
-                          const Vector4d &plane2,
-                          Vector3d &p_r,
-                          Vector3d &t_r,
+bool FindIntersectionLine(const Eigen::Vector4d &plane1,
+                          const Eigen::Vector4d &plane2,
+                          Eigen::Vector3d &p_r,
+                          Eigen::Vector3d &t_r,
                           const double &tol)
 {
-    Vector3d normal1 = {plane1[0], plane1[1], plane1[2]};
-    Vector3d normal2 = {plane2[0], plane2[1], plane2[2]};
+    Eigen::Vector3d normal1 = {plane1[0], plane1[1], plane1[2]};
+    Eigen::Vector3d normal2 = {plane2[0], plane2[1], plane2[2]};
 
     t_r = normal1.cross(normal2);
 
@@ -37,12 +37,12 @@ bool FindIntersectionLine(const Vector4d &plane1,
     }
 
     // Se non sono paralleli trovo la retta di intersezione
-    Matrix3d normalMatrix;
+    Eigen::Matrix3d normalMatrix;
     normalMatrix.row(0) = normal1;
     normalMatrix.row(1) = normal2;
     normalMatrix.row(2) = t_r;
 
-    Vector3d constantTerms = {plane1[3], plane2[3], 0};
+    Eigen::Vector3d constantTerms = {plane1[3], plane2[3], 0};
     p_r = normalMatrix.fullPivLu().solve(constantTerms);
 
     return true;
@@ -59,7 +59,7 @@ bool ImportFracture(const string &fileName,
                     DFN &dfn)
 {
 
-    ifstream file(fileName);
+    std::ifstream file(fileName);
 
     if(file.fail())
     {
@@ -67,14 +67,14 @@ bool ImportFracture(const string &fileName,
         return false;
     }
 
-    string header;
-    string line;
+    std::string header;
+    std::string line;
 
     getline(file, header);    // # Number of Fractures
 
     getline(file, line);
 
-    istringstream nFractures(line);
+    std::istringstream nFractures(line);
     nFractures >> dfn.NumberFractures;
     dfn.Fractures.resize(dfn.NumberFractures);
 
@@ -83,11 +83,11 @@ bool ImportFracture(const string &fileName,
         getline(file, header);  // # FractureId; NumVertices
 
         getline(file, line, ';');
-        istringstream idFractures(line);
+        std::istringstream idFractures(line);
         idFractures >> dfn.Fractures[i].Id;
 
         getline(file, line);
-        istringstream nVertices(line);
+        std::istringstream nVertices(line);
         nVertices >> dfn.Fractures[i].NumberVertices;  // numVertices
 
         dfn.Fractures[i].VerticesCoordinates.resize(3, dfn.Fractures[i].NumberVertices);
@@ -98,7 +98,7 @@ bool ImportFracture(const string &fileName,
         {
             getline(file, line);
             replace(line.begin(), line.end(), ';', ' ');
-            istringstream converter(line);
+            std::istringstream converter(line);
 
             for(unsigned int k = 0; k < dfn.Fractures[i].NumberVertices; k++)
             {
@@ -106,7 +106,7 @@ bool ImportFracture(const string &fileName,
             }
         }
 
-        Vector3d barycentre = dfn.Fractures[i].VerticesCoordinates.rowwise().mean();
+        Eigen::Vector3d barycentre = dfn.Fractures[i].VerticesCoordinates.rowwise().mean();
         dfn.Fractures[i].Barycentre = barycentre;
     }
 
@@ -121,7 +121,7 @@ void CalculateTraces(DFN &dfn,
                      unsigned int &id,
                      const double &tol)
 {
-    // Controllo che le circoferenze che contengono i due poligoni non si intersecano
+    // Controllo che le sfere che contengono i due poligoni non si intersecano
 
     double r1 = f1.CalculateR();
     double r2 = f2.CalculateR();
@@ -132,16 +132,17 @@ void CalculateTraces(DFN &dfn,
         return;
 
     // Controllo che i piani contenenti i due poligoni non siano paralleli
-    Vector4d plane1 = f1.CalculatePlane();
-    Vector4d plane2 = f2.CalculatePlane();
 
-    Vector3d p_r;
-    Vector3d t_r;
+    Eigen::Vector4d plane1 = f1.CalculatePlane();
+    Eigen::Vector4d plane2 = f2.CalculatePlane();
 
-    Vector2d beta_1 = {};
-    Vector2d beta_2 = {};
+    Eigen::Vector3d p_r;
+    Eigen::Vector3d t_r;
 
-    map<unsigned int, bool> isOnEdge;
+    Eigen::Vector2d beta_1 = {};
+    Eigen::Vector2d beta_2 = {};
+
+    std::map<unsigned int, bool> isOnEdge;
 
     isOnEdge[f1.Id] = false;
     isOnEdge[f2.Id] = false;
@@ -180,7 +181,7 @@ void CalculateTraces(DFN &dfn,
     trace.Id = id++;
     trace.FracturesIds = {f1.Id, f2.Id};
 
-    MatrixXd endPoints(2, 3);
+    Eigen::MatrixXd endPoints(2, 3);
 
     if(beta_1[0] < beta_2[0])
     {
@@ -247,7 +248,7 @@ void CalculateTraces(DFN &dfn,
     dfn.Traces.push_back(trace);
 }
 
-bool ReadDFN(const string &fileName,
+bool ReadDFN(const std::string &fileName,
              DFN &dfn,
              const double &tol)
 {
@@ -279,11 +280,11 @@ bool ReadDFN(const string &fileName,
     return true;
 }
 
-void WriteOutputFiles(const string &outputTracesFile,
-                      const string &outputTipsFile,
+void WriteOutputFiles(const std::string &outputTracesFile,
+                      const std::string &outputTipsFile,
                       const DFN &dfn)
 {
-    ofstream tracesFile(outputTracesFile);
+    std::ofstream tracesFile(outputTracesFile);
 
     tracesFile << "# Number of Traces" << endl;
     tracesFile << dfn.NumberTraces << endl;
@@ -308,7 +309,7 @@ void WriteOutputFiles(const string &outputTracesFile,
 
     tracesFile.close();
 
-    ofstream tipsFile(outputTipsFile);
+    std::ofstream tipsFile(outputTipsFile);
 
     for(const Fracture &f : dfn.Fractures)
     {

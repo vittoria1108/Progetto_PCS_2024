@@ -218,7 +218,7 @@ TEST(DFNTEST, TestIntersectionLineTrue){
 TEST(DFNTEST, TestReadDFNTrue){
 
     double tol = 10 * numeric_limits<double>::epsilon();
-    const string fileName = "C:/Users/user/OneDrive/Desktop/Progetto_PCS_2024/Project/src_test/Test_DFN.txt";
+    const string fileName = "./src_test/Test_DFN.txt";
     DFN dfn;
 
     bool success = ReadDFN(fileName, dfn, tol);
@@ -291,7 +291,7 @@ TEST(DFNTEST, TestReadDFNFalse){
 //****************************************************************
 TEST(DFNTEST, TestImportFracture){
 
-    const string fileName = "C:/Users/user/OneDrive/Desktop/Progetto_PCS_2024/Project/src_test/Test_Fracture.txt";
+    const string fileName = "./src_test/Test_Fracture.txt";
     DFN dfn;
 
     bool success = ImportFracture(fileName, dfn);

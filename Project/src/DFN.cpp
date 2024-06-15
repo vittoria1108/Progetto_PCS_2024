@@ -287,10 +287,10 @@ void WriteOutputFiles(const std::string &outputTracesFile,
 {
     std::ofstream tracesFile(outputTracesFile);
 
-    tracesFile << "# Number of Traces" << endl;
-    tracesFile << dfn.NumberTraces << endl;
+    tracesFile << "# Number of Traces" << std::endl;
+    tracesFile << dfn.NumberTraces << std::endl;
 
-    tracesFile << "# TraceId; FractureId1; FractureId2; X1; Y1; Z1; X2; Y2; Z2" << endl;
+    tracesFile << "# TraceId; FractureId1; FractureId2; X1; Y1; Z1; X2; Y2; Z2" << std::endl;
 
     for(Trace trace : dfn.Traces)
     {
@@ -305,8 +305,8 @@ void WriteOutputFiles(const std::string &outputTracesFile,
             }
         }
 
-        tracesFile << setprecision(16) << scientific << trace.EndpointsCoordinates(1, 2) << endl;
-        tracesFile << endl;
+        tracesFile << setprecision(16) << scientific << trace.EndpointsCoordinates(1, 2) << std::endl;
+        tracesFile << std::endl;
     }
 
     tracesFile.close();
@@ -317,23 +317,23 @@ void WriteOutputFiles(const std::string &outputTracesFile,
     {
         unsigned int totalSize = f.PassTraces.size() + f.NotPassTraces.size();
 
-        tipsFile << "# FractureId; NumTraces" << endl;
-        tipsFile << f.Id << "; " << totalSize << endl;
+        tipsFile << "# FractureId; NumTraces" << std::endl;
+        tipsFile << f.Id << "; " << totalSize << std::endl;
 
         if(totalSize != 0)
-            tipsFile << "# TraceId; Tips; Length" << endl;
+            tipsFile << "# TraceId; Tips; Length" << std::endl;
 
         for(const Trace &t : f.NotPassTraces)
         {
-            tipsFile << t.Id << "; true; " << setprecision(16) << scientific << t.Length << endl;
+            tipsFile << t.Id << "; true; " << setprecision(16) << scientific << t.Length << std::endl;
         }
 
         for(const Trace &t : f.PassTraces)
         {
-            tipsFile << t.Id << "; false; " << setprecision(16) << scientific << t.Length << endl;
+            tipsFile << t.Id << "; false; " << setprecision(16) << scientific << t.Length << std::endl;
         }
 
-        tipsFile << endl;
+        tipsFile << std::endl;
     }
 
     tipsFile.close();

@@ -46,6 +46,31 @@ int main(int argc, char ** argv)
                      outputTipsFile,
                      dfn);
 
+
+    /*unsigned int num_iter = 10;
+
+    double average = 0;
+
+    for(unsigned int k = 0; k < num_iter; k++)
+    {
+        std::chrono::steady_clock::time_point t_begin = std::chrono::steady_clock::now();
+        ReadDFN(fileName,
+                dfn,
+                tol);
+        std::chrono::steady_clock::time_point t_end = std::chrono::steady_clock::now();
+
+        double duration = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_begin).count();
+
+        average += duration;
+        std::cout << duration << std::endl;
+    }
+
+    std::cout << std::endl;
+    average = average/num_iter;
+
+    std::cout << "Average time: " << average << std::endl;*/
+
+
     std::vector<PolygonalLibrary::PolygonalMesh> allPM;
 
     for(unsigned int i = 0; i < dfn.NumberFractures; i++)

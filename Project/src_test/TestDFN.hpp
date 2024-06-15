@@ -265,14 +265,14 @@ TEST(DFNTEST, TestReadDFNTrue){
     EXPECT_NEAR(dfn.Traces[0].Length, 1.07, 0.1);
     EXPECT_NEAR(dfn.Traces[1].Length, 2.43, 0.1);
 
-    EXPECT_EQ(dfn.Fractures[0].nTraces.size(), 1);
-    EXPECT_EQ(dfn.Fractures[0].pTraces.size(), 0);
+    EXPECT_EQ(dfn.Fractures[0].NotPassTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[0].PassTraces.size(), 0);
 
-    EXPECT_EQ(dfn.Fractures[1].nTraces.size(), 1);
-    EXPECT_EQ(dfn.Fractures[1].pTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[1].NotPassTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[1].PassTraces.size(), 1);
 
-    EXPECT_EQ(dfn.Fractures[2].nTraces.size(), 0);
-    EXPECT_EQ(dfn.Fractures[2].pTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[2].NotPassTraces.size(), 0);
+    EXPECT_EQ(dfn.Fractures[2].PassTraces.size(), 1);
 
     EXPECT_TRUE(success);
 }

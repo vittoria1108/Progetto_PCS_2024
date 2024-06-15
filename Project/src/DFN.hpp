@@ -12,15 +12,15 @@ using namespace Eigen;
 
 namespace FractureLibrary{
 
-double CalculateSquareDistance(const Eigen::Vector3d point1,
-                               const Eigen::Vector3d point2);
+double CalculateSquareDistance(const Eigen::Vector3d &point1,
+                               const Eigen::Vector3d &point2);
 
 struct Trace{
 
-    unsigned int Id;
+    unsigned int Id = -1;
     Eigen::Vector2i FracturesIds = {};
     Eigen::MatrixXd EndpointsCoordinates = {};
-    double Length;
+    double Length = 0;
 
     std::map<unsigned int, bool> IsOnEdge = {};
 
@@ -28,14 +28,14 @@ struct Trace{
 
 struct Fracture{
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
     unsigned int NumberVertices = 0;
     Eigen::MatrixXd VerticesCoordinates = {};
     Eigen::Vector3d Barycentre = {};
     std::map<unsigned int, bool> Tips = {};
 
-    std::vector<Trace> nTraces = {};
-    std::vector<Trace> pTraces = {};
+    std::vector<Trace> PassTraces = {};
+    std::vector<Trace> NotPassTraces = {};
 
     Eigen::Vector4d CalculatePlane()
     {
@@ -53,7 +53,7 @@ struct Fracture{
     }
 
     bool IsInPlane(const Eigen::Vector4d &plane,
-                    const double &tol)
+                   const double &tol)
     {
         Eigen::Vector3d point = VerticesCoordinates.col(0);
         Eigen::Vector3d normal = {plane[0], plane[1], plane[2]};
@@ -88,7 +88,7 @@ struct Fracture{
 
         for(unsigned int i = 0; i < NumberVertices; i++)
         {
-            unsigned int next; //per tenere conto anche dell'ultimo lato
+            unsigned int next; // Per tenere conto anche dell'ultimo lato
 
             if (i == (NumberVertices - 1))
                 next = 0;
@@ -96,7 +96,7 @@ struct Fracture{
                 next = i + 1;
 
             /* segmento s: Ps + alfa*ts
-           retta    r: Pr + beta*tr */
+               retta    r: Pr + beta*tr */
 
             Eigen::Vector3d p_s = VerticesCoordinates.col(i);
             Eigen::Vector3d t_s = VerticesCoordinates.col(next) - VerticesCoordinates.col(i);
@@ -121,7 +121,7 @@ struct Fracture{
             else
             {
                 bool sameLine = true;
-                std::vector<unsigned int> indexBeta;
+                std::vector<unsigned int> validIndexBeta;
                 double betaTemp = 0;
                 double oldBeta = 0;
 
@@ -130,7 +130,7 @@ struct Fracture{
                 {
                     if(abs(t_r[j]) > tol)
                     {
-                        indexBeta.push_back(j);
+                        validIndexBeta.push_back(j);
                     }
                     else if(abs(p_s[j] - p_r[j]) > tol)
                     {
@@ -141,15 +141,19 @@ struct Fracture{
 
                 /* Se le coordinate dei punti sono uguali quando non riesco a calcolare le beta,
                     controllo che le beta calcolabili siano uguali*/
+
                 if(sameLine)
                 {
-                    unsigned int index = indexBeta[0];
+                    unsigned int index = validIndexBeta[0];
                     oldBeta = (p_s[index] - p_r[index]) / t_r[index];
 
-                    indexBeta.erase(indexBeta.begin());
+                    validIndexBeta.erase(validIndexBeta.begin());
 
-                    for(unsigned int j : indexBeta)
+                    for(unsigned int j : validIndexBeta)
                     {
+                        if(j == index)
+                            continue;
+
                         betaTemp = (p_s[j] - p_r[j]) / t_r[j];
 
                         if(abs(betaTemp - oldBeta) > tol)
@@ -157,10 +161,9 @@ struct Fracture{
                             sameLine = false;
                             break;
                         }
-
-                        oldBeta = betaTemp;
                     }
                 }
+
 
                 if(sameLine)
                 {
@@ -180,12 +183,12 @@ struct Fracture{
         return false;
     }
 
-    bool IntersectsEdges(Fracture &f,
-                        Eigen::Vector2d &beta_1,
-                        Eigen::Vector2d &beta_2,
-                        Eigen::Vector3d &p_r,
-                        Eigen::Vector3d &t_r,
-                        const double &tol)
+    bool IntersectsEdges(const Fracture &f,
+                         Eigen::Vector2d &beta_1,
+                         Eigen::Vector2d &beta_2,
+                         Eigen::Vector3d &p_r,
+                         Eigen::Vector3d &t_r,
+                         const double &tol)
     {
 
         for(unsigned int i = 0; i < NumberVertices; i++)
@@ -205,7 +208,7 @@ struct Fracture{
 
             for(unsigned int k = 0; k < 3; k++)
             {
-                if(abs(t_r[k]) > tol)
+                if(abs(t_r[k]) > tol) // Salvo la coordinata di t_r con la quale posso calcolare beta
                 {
                     index = k;
                     break;
@@ -228,6 +231,7 @@ struct Fracture{
                 beta_2[0] = (C[index] - p_r[index]) / t_r[index];
                 beta_2[1] = (D[index] - p_r[index]) / t_r[index];
 
+                // Verifico che sia C che D stanno sulla retta del lato AB
                 for(unsigned int i = 0; i < 3; i++)
                 {
                     if(i == index)
@@ -250,7 +254,6 @@ struct Fracture{
 
                     return true;
                 }
-
             }
         }
 
@@ -277,11 +280,6 @@ bool FindIntersectionLine(const Eigen::Vector4d &plane1,
 bool CompareTraces(const Trace &t1,
                    const Trace &t2);
 
-
-bool ReadDFN(const std::string &fileName,
-             DFN &dfn,
-             const double &tol);
-
 bool ImportFracture(const std::string &fileName,
                     DFN &dfn);
 
@@ -290,6 +288,10 @@ void CalculateTraces(DFN &dfn,
                      Fracture &f2,
                      unsigned int &id,
                      const double &tol);
+
+bool ReadDFN(const std::string &fileName,
+             DFN &dfn,
+             const double &tol);
 
 void WriteOutputFiles(const std::string &outputTracesFile,
                       const std::string &outputTipsFile,

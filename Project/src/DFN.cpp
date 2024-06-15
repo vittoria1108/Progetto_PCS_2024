@@ -13,8 +13,8 @@ using namespace Eigen;
 
 namespace FractureLibrary{
 
-double CalculateSquareDistance(const Eigen::Vector3d point1,
-                               const Eigen::Vector3d point2)
+double CalculateSquareDistance(const Eigen::Vector3d &point1,
+                               const Eigen::Vector3d &point2)
 {
     double result = (point1 - point2).transpose() * (point1 - point2);
     return result;
@@ -31,12 +31,13 @@ bool FindIntersectionLine(const Eigen::Vector4d &plane1,
 
     t_r = normal1.cross(normal2);
 
-    if(t_r.norm() < tol)
+    if(t_r.norm() < tol) // I piani sono paralleli
     {
         return false;
     }
 
     // Se non sono paralleli trovo la retta di intersezione
+
     Eigen::Matrix3d normalMatrix;
     normalMatrix.row(0) = normal1;
     normalMatrix.row(1) = normal2;
@@ -55,7 +56,7 @@ bool CompareTraces(const Trace &t1,
 }
 
 
-bool ImportFracture(const string &fileName,
+bool ImportFracture(const std::string &fileName,
                     DFN &dfn)
 {
 
@@ -131,7 +132,7 @@ void CalculateTraces(DFN &dfn,
     if(barDistances - ((r1 + r2) * (r1 + r2)) > tol)
         return;
 
-    // Controllo che i piani contenenti i due poligoni non siano paralleli
+    // Calcolo i piani contenenti i poligoni
 
     Eigen::Vector4d plane1 = f1.CalculatePlane();
     Eigen::Vector4d plane2 = f2.CalculatePlane();
@@ -147,8 +148,8 @@ void CalculateTraces(DFN &dfn,
     isOnEdge[f1.Id] = false;
     isOnEdge[f2.Id] = false;
 
-    if(FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
-    {
+    if(FindIntersectionLine(plane1, plane2, p_r, t_r, tol)) // Controllo se riesco a trovare la retta di intersezione tra i piani
+    {                                                       // (se non sono paralleli)
         // Controllo se la retta interseca le figure
 
         if(!f1.IntersectsLine(p_r, t_r, beta_1, isOnEdge, tol))
@@ -163,8 +164,8 @@ void CalculateTraces(DFN &dfn,
         if(beta_2[1] < beta_1[0])
             return;
     }
-    else
-    {
+    else    // Se i piani sono paralleli, controllo se effettivamente coincidono e, in questo caso,
+    {       // se le fratture hanno dei lati che si intersecano
         if(f1.IsInPlane(plane2, tol) && f1.IntersectsEdges(f2, beta_1, beta_2, p_r, t_r, tol))
         {
             isOnEdge[f1.Id] = true;
@@ -215,34 +216,34 @@ void CalculateTraces(DFN &dfn,
     if(abs(beta_1[0] - beta_2[0]) < tol && abs(beta_1[1] - beta_2[1]) < tol)
     {
         f1.Tips[trace.Id] = false;
-        f1.pTraces.push_back(trace);
+        f1.PassTraces.push_back(trace);
 
         f2.Tips[trace.Id] = false;
-        f2.pTraces.push_back(trace);
+        f2.PassTraces.push_back(trace);
     }
     else if(beta_1[0] > beta_2[0] && beta_1[1] < beta_2[1])
     {
         f1.Tips[trace.Id] = false;
-        f1.pTraces.push_back(trace);
+        f1.PassTraces.push_back(trace);
 
         f2.Tips[trace.Id] = true;
-        f2.nTraces.push_back(trace);
+        f2.NotPassTraces.push_back(trace);
     }
     else if(beta_2[0] > beta_1[0] && beta_2[1] < beta_1[1])
     {
         f1.Tips[trace.Id] = true;
-        f1.nTraces.push_back(trace);
+        f1.NotPassTraces.push_back(trace);
 
         f2.Tips[trace.Id] = false;
-        f2.pTraces.push_back(trace);
+        f2.PassTraces.push_back(trace);
     }
     else
     {
         f1.Tips[trace.Id] = true;
-        f1.nTraces.push_back(trace);
+        f1.NotPassTraces.push_back(trace);
 
         f2.Tips[trace.Id] = true;
-        f2.nTraces.push_back(trace);
+        f2.NotPassTraces.push_back(trace);
     }
 
     dfn.Traces.push_back(trace);
@@ -273,8 +274,8 @@ bool ReadDFN(const std::string &fileName,
 
     for(unsigned int i = 0; i < dfn.NumberFractures; i++)
     {
-        sort(dfn.Fractures[i].nTraces.begin(), dfn.Fractures[i].nTraces.end(), CompareTraces);
-        sort(dfn.Fractures[i].pTraces.begin(), dfn.Fractures[i].pTraces.end(), CompareTraces);
+        sort(dfn.Fractures[i].NotPassTraces.begin(), dfn.Fractures[i].NotPassTraces.end(), CompareTraces);
+        sort(dfn.Fractures[i].PassTraces.begin(), dfn.Fractures[i].PassTraces.end(), CompareTraces);
     }
 
     return true;
@@ -313,7 +314,7 @@ void WriteOutputFiles(const std::string &outputTracesFile,
 
     for(const Fracture &f : dfn.Fractures)
     {
-        unsigned int totalSize = f.pTraces.size() + f.nTraces.size();
+        unsigned int totalSize = f.PassTraces.size() + f.NotPassTraces.size();
 
         tipsFile << "# FractureId; NumTraces" << endl;
         tipsFile << f.Id << "; " << totalSize << endl;
@@ -321,12 +322,12 @@ void WriteOutputFiles(const std::string &outputTracesFile,
         if(totalSize != 0)
             tipsFile << "# TraceId; Tips; Length" << endl;
 
-        for(const Trace &t : f.nTraces)
+        for(const Trace &t : f.NotPassTraces)
         {
             tipsFile << t.Id << "; true; " << t.Length << endl;
         }
 
-        for(const Trace &t : f.pTraces)
+        for(const Trace &t : f.PassTraces)
         {
             tipsFile << t.Id << "; false; " << t.Length << endl;
         }

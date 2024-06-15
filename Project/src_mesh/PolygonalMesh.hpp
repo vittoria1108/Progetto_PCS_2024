@@ -2,30 +2,31 @@
 #define __POLYGONALMESH_H
 
 #include <iostream>
-#include "Eigen/Eigen"
-#include "DFN.hpp"
+#include <Eigen/Eigen>
+#include <DFN.hpp>
+
 
 using namespace std;
 using namespace Eigen;
 using namespace FractureLibrary;
 
-namespace PolygonalLibrary{
 
+namespace PolygonalLibrary{
 
 struct Cell0D {
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
     Eigen::Vector3d Coordinates = {};
 
 };
 
 struct Cell1D {
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
     Eigen::Vector2i Vertices = {};
 
     bool IsOld = false;
-    unsigned int CuttedBy = 0;
+    unsigned int CuttedBy = -1;
 
     std::list<unsigned int> NearCells2D = {};
 
@@ -33,7 +34,7 @@ struct Cell1D {
 
 struct Cell2D {
 
-    unsigned int Id = 0;
+    unsigned int Id = -1;
 
     unsigned int NumberVertices = 0;
     std::vector<unsigned int> Vertices = {};
@@ -44,7 +45,7 @@ struct Cell2D {
     bool IsOld = false;
     bool IsValid = true;
 
-    double CalculateArea(std::vector<Cell0D> allCells0D)
+    double CalculateArea(const std::vector<Cell0D> &allCells0D)
     {
         double area = 0;
 
@@ -103,6 +104,22 @@ void CreateFirstCell(PolygonalMesh &PM,
                      const FractureLibrary::Fracture &f,
                      unsigned int &idCell2D);
 
+void CreateNewCellsByTrace(PolygonalMesh &PM,
+                           unsigned int &idCell1D,
+                           unsigned int &idCell2D,
+                           const std::vector<Cell0D> &vertices,
+                           const unsigned int &indexNewEdge,
+                           const std::vector<unsigned int> &firstCell2DVertices,
+                           const std::vector<unsigned int> &secondCell2DVertices,
+                           std::vector<unsigned int> &firstCell2DEdges,
+                           std::vector<unsigned int> &secondCell2DEdges,
+                           const double &tol);
+
+void CreateLastCell(PolygonalMesh &PM,
+                    unsigned int &idCell2D,
+                    const Cell2D *cell2D,
+                    const vector<Cell1D> &newEdges);
+
 void CreateNewCells(PolygonalMesh &PM,
                     const FractureLibrary::Trace &t,
                     unsigned int &idCell0D,
@@ -111,7 +128,7 @@ void CreateNewCells(PolygonalMesh &PM,
                     const bool &pass,
                     const double &tol);
 
-void ImportMesh(PolygonalMesh &PM,
+void GenerateMesh(PolygonalMesh &PM,
                 const FractureLibrary::Fracture &f,
                 const double &tol);
 

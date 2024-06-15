@@ -3,9 +3,11 @@
 #include "DFN.hpp"
 #include "PolygonalMesh.hpp"
 
+
 using namespace std;
 using namespace Eigen;
 using namespace FractureLibrary;
+
 
 namespace PolygonalLibrary{
 
@@ -17,8 +19,8 @@ bool AlreadyExists(const Eigen::Vector3d &coordinates,
     for(Cell0D cell : PM.Cells0D)
     {
         if(abs(cell.Coordinates[0] - coordinates[0]) < tol &&
-            abs(cell.Coordinates[1] - coordinates[1]) < tol &&
-            abs(cell.Coordinates[2] - coordinates[2]) < tol)
+           abs(cell.Coordinates[1] - coordinates[1]) < tol &&
+           abs(cell.Coordinates[2] - coordinates[2]) < tol)
         {
             id = cell.Id;
             return true;
@@ -135,6 +137,157 @@ void CreateFirstCell(PolygonalMesh &PM,
     PM.Cells2D.push_back(fracture);
 }
 
+void CreateNewCellsByTrace(PolygonalMesh &PM,
+                           unsigned int &idCell1D,
+                           unsigned int &idCell2D,
+                           const std::vector<Cell0D> &vertices,
+                           const unsigned int &indexNewEdge,
+                           const std::vector<unsigned int> &firstCell2DVertices,
+                           const std::vector<unsigned int> &secondCell2DVertices,
+                           std::vector<unsigned int> &firstCell2DEdges,
+                           std::vector<unsigned int> &secondCell2DEdges,
+                           const double &tol)
+{
+    Cell1D trace;
+    trace.Id = idCell1D++;
+
+    Eigen::Vector2i traceVertices = {vertices[0].Id, vertices[1].Id};
+    trace.Vertices = traceVertices;
+
+    firstCell2DEdges[indexNewEdge] = trace.Id;
+    secondCell2DEdges.push_back(trace.Id);
+
+    Cell2D firstCell2D;
+    firstCell2D.Id = idCell2D++;
+    firstCell2D.NumberVertices = firstCell2DVertices.size();
+    firstCell2D.Vertices = firstCell2DVertices;
+    firstCell2D.NumberEdges = firstCell2DEdges.size();
+    firstCell2D.Edges = firstCell2DEdges;
+
+    double firstArea = firstCell2D.CalculateArea(PM.Cells0D);
+
+    if(firstArea < tol*tol)
+    {
+        firstCell2D.IsValid = false;
+    }
+
+    Cell2D secondCell2D;
+    secondCell2D.Id = idCell2D++;
+    secondCell2D.NumberVertices = secondCell2DVertices.size();
+    secondCell2D.Vertices = secondCell2DVertices;
+    secondCell2D.NumberEdges = secondCell2DEdges.size();
+    secondCell2D.Edges = secondCell2DEdges;
+
+    double secondArea = secondCell2D.CalculateArea(PM.Cells0D);
+
+    if(secondArea < tol*tol)
+    {
+        secondCell2D.IsValid = false;
+    }
+
+    PM.NumberCell2D++;
+    PM.Cells2D.push_back(firstCell2D);
+
+    PM.NumberCell2D++;
+    PM.Cells2D.push_back(secondCell2D);
+
+    for(unsigned int i : firstCell2DEdges)
+    {
+        if(i != trace.Id)
+            PM.Cells1D[i].NearCells2D.push_back(firstCell2D.Id);
+    }
+
+    for(unsigned int i : secondCell2DEdges)
+    {
+        if(i != trace.Id)
+            PM.Cells1D[i].NearCells2D.push_back(secondCell2D.Id);
+    }
+
+    trace.NearCells2D.push_back(firstCell2D.Id);
+    trace.NearCells2D.push_back(secondCell2D.Id);
+
+    PM.NumberCell1D++;
+    PM.Cells1D.push_back(trace);
+}
+
+void CreateLastCell(PolygonalMesh &PM,
+                    unsigned int &idCell2D,
+                    const Cell2D *cell2D,
+                    const vector<Cell1D> &newEdges)
+{
+    std::vector<unsigned int> newCell2DVertices = {};
+    std::vector<unsigned int> newCell2DEdges = {};
+
+    for(unsigned int i : cell2D->Edges)
+    {
+        Cell1D *cell = &PM.Cells1D[i];
+
+        int firstVertice;
+        int secondVertice;
+
+        for(unsigned int j = 0; j < cell2D->Vertices.size(); j++)
+        {
+            int next = j == cell2D->Vertices.size() - 1 ? 0 : j + 1;
+
+            firstVertice = cell2D->Vertices[j];
+
+            auto it = find(cell->Vertices.begin(), cell->Vertices.end(), firstVertice);
+
+            if (it == cell->Vertices.end())
+                continue;
+
+            secondVertice = cell2D->Vertices[next];
+
+            it = find(cell->Vertices.begin(), cell->Vertices.end(), secondVertice);
+
+            if(it == cell->Vertices.end())
+                continue;
+
+            break;
+        }
+
+        newCell2DVertices.push_back(firstVertice);
+
+        if(cell->IsOld)
+        {
+            newCell2DVertices.push_back(cell->CuttedBy);
+
+            unsigned int firstEdge = 0;
+            unsigned int secondEdge = 0;
+
+            for(Cell1D newEdge : newEdges)
+            {
+                if(newEdge.Vertices[0] == cell->CuttedBy && newEdge.Vertices[1] == firstVertice)
+                {
+                    firstEdge = newEdge.Id;
+                }
+                else if(newEdge.Vertices[0] == secondVertice && newEdge.Vertices[1] == cell->CuttedBy)
+                {
+                    secondEdge = newEdge.Id;
+                }
+            }
+
+            newCell2DEdges.push_back(firstEdge);
+            newCell2DEdges.push_back(secondEdge);
+        }
+        else
+        {
+            newCell2DEdges.push_back(i);
+        }
+    }
+
+    Cell2D newCell2D;
+    newCell2D.Id = idCell2D++;
+    newCell2D.NumberVertices = newCell2DVertices.size();
+    newCell2D.Vertices = newCell2DVertices;
+    newCell2D.NumberEdges = newCell2DEdges.size();
+    newCell2D.Edges = newCell2DEdges;
+
+    PM.NumberCell2D++;
+    PM.Cells2D.push_back(newCell2D);
+}
+
+
 void CreateNewCells(PolygonalMesh &PM,
                     const FractureLibrary::Trace &t,
                     unsigned int &idCell0D,
@@ -154,8 +307,11 @@ void CreateNewCells(PolygonalMesh &PM,
         indexCell1D++;
     }
 
+    std::vector<unsigned int> indexIntersectedCell1D = {};
+
     std::list<unsigned int> cells2D = PM.Cells1D[indexCell1D].NearCells2D;
 
+    // Finchè ho celle vicine
     while(cells2D.size() != 0)
     {
         indexCell2D = cells2D.front();
@@ -172,6 +328,7 @@ void CreateNewCells(PolygonalMesh &PM,
 
         if(!pass && !CellContainsTrace(PM, cell2D, p_r, t_r, beta, tol))
         {
+            // Se avevo solo una cella 2D adiacente al lato cambio lato, altrimenti passo alla cella 2D successiva
             if(cells2D.size() == 1)
             {
                 indexCell1D++;
@@ -190,9 +347,7 @@ void CreateNewCells(PolygonalMesh &PM,
             }
         }
 
-        std::vector<unsigned int> indexIntersectedCell1D = {};
-
-        std::vector<Cell0D> vertices;
+        std::vector<Cell0D> vertices = {};
 
         unsigned int indexNewEdge = 0;
 
@@ -221,6 +376,7 @@ void CreateNewCells(PolygonalMesh &PM,
             Cell0D firstCell0D;
             Cell0D secondCell0D;
 
+            // Salvo gli estremi della cella 1D in senso antiorario
             for(unsigned int j = 0; j < cell2D->Vertices.size(); j++)
             {
                 int next = j == cell2D->Vertices.size() - 1 ? 0 : j + 1;
@@ -256,6 +412,12 @@ void CreateNewCells(PolygonalMesh &PM,
 
             if(IntersectionCellTrace(p_s, t_s, p_r, t_r, coordinates, tol))
             {
+                // Mantengo l'ordine delle celle intersecate
+                auto it = find(indexIntersectedCell1D.begin(), indexIntersectedCell1D.end(), cell1D->Id);
+
+                if(it == indexIntersectedCell1D.end())
+                    indexIntersectedCell1D.push_back(cell1D->Id);
+
                 unsigned int id;
                 Cell0D newCell0D;
                 Cell1D firstCell1D;
@@ -336,7 +498,7 @@ void CreateNewCells(PolygonalMesh &PM,
                 {
                     firstCell2DEdges.push_back(firstCell1D.Id);
 
-                    indexNewEdge = firstCell2DEdges.size();
+                    indexNewEdge = firstCell2DEdges.size(); // Salvo la posizione nella quale dovrò aggiungere la cella 1D della traccia
                     firstCell2DEdges.push_back(firstCell1D.Id);
 
                     secondCell2DEdges.push_back(secondCell1D.Id);
@@ -358,81 +520,27 @@ void CreateNewCells(PolygonalMesh &PM,
             }
         }
 
+        // Se ho intersecato la cella
         if(firstCell2DEdges != cell2D->Edges)
         {
-            Cell1D trace;
-            trace.Id = idCell1D++;
-
-            Eigen::Vector2i traceVertices = {vertices[0].Id, vertices[1].Id};
-            trace.Vertices = traceVertices;
-
-            firstCell2DEdges[indexNewEdge] = trace.Id;
-            secondCell2DEdges.push_back(trace.Id);
-
             cell2D->IsOld = true;
 
-            Cell2D firstCell2D;
-            firstCell2D.Id = idCell2D++;
-            firstCell2D.NumberVertices = firstCell2DVertices.size();
-            firstCell2D.Vertices = firstCell2DVertices;
-            firstCell2D.NumberEdges = firstCell2DEdges.size();
-            firstCell2D.Edges = firstCell2DEdges;
-
-            double firstArea = firstCell2D.CalculateArea(PM.Cells0D);
-
-            if(firstArea < tol*tol)
-            {
-                firstCell2D.IsValid = false;
-            }
-
-            Cell2D secondCell2D;
-            secondCell2D.Id = idCell2D++;
-            secondCell2D.NumberVertices = secondCell2DVertices.size();
-            secondCell2D.Vertices = secondCell2DVertices;
-            secondCell2D.NumberEdges = secondCell2DEdges.size();
-            secondCell2D.Edges = secondCell2DEdges;
-
-            double secondArea = secondCell2D.CalculateArea(PM.Cells0D);
-
-            if(secondArea < tol*tol)
-            {
-                secondCell2D.IsValid = false;
-            }
-
-            PM.NumberCell2D++;
-            PM.Cells2D.push_back(firstCell2D);
-
-            PM.NumberCell2D++;
-            PM.Cells2D.push_back(secondCell2D);
-
-            for(unsigned int i : firstCell2DEdges)
-            {
-                if(i != trace.Id)
-                    PM.Cells1D[i].NearCells2D.push_back(firstCell2D.Id);
-            }
-
-            for(unsigned int i : secondCell2DEdges)
-            {
-                if(i != trace.Id)
-                    PM.Cells1D[i].NearCells2D.push_back(secondCell2D.Id);
-            }
-
-            trace.NearCells2D.push_back(firstCell2D.Id);
-            trace.NearCells2D.push_back(secondCell2D.Id);
-
-            PM.NumberCell1D++;
-            PM.Cells1D.push_back(trace);
+            CreateNewCellsByTrace(PM, idCell1D, idCell2D, vertices, indexNewEdge,
+                                  firstCell2DVertices, secondCell2DVertices, firstCell2DEdges, secondCell2DEdges, tol);
 
             cells2D.erase(cells2D.begin());
 
+            /* Se ho finito le celle 2D adiacenti al lato considerato
+             * vado avanti con l'altro lato intersecato dalla traccia*/
             if(cells2D.size() == 0)
             {
-                unsigned int index = indexIntersectedCell1D[1];
+                unsigned int index = indexIntersectedCell1D.back();
                 cells2D = PM.Cells1D[index].NearCells2D;
             }
         }
-        else
+        else // Se non ho intersecato la cella
         {
+            // Se era l'ultima vado avanti con le celle 1D, altrimenti con quelle 2D
             if(cells2D.size() == 1)
                 cells2D = PM.Cells1D[++indexCell1D].NearCells2D;
             else
@@ -455,83 +563,14 @@ void CreateNewCells(PolygonalMesh &PM,
 
         if(!pass && (beta[0] <= 0 || beta[1] >= 1) && !CellContainsTrace(PM, cell2D, p_r, t_r, beta, tol))
         {
-            std::vector<unsigned int> newCell2DVertices = {};
-            std::vector<unsigned int> newCell2DEdges = {};
-
-            for(unsigned int i : cell2D->Edges)
-            {
-                Cell1D *cell = &PM.Cells1D[i];
-
-                int firstVertice;
-                int secondVertice;
-
-                for(unsigned int j = 0; j < cell2D->Vertices.size(); j++)
-                {
-                    int next = j == cell2D->Vertices.size() - 1 ? 0 : j + 1;
-
-                    firstVertice = cell2D->Vertices[j];
-
-                    auto it = find(cell->Vertices.begin(), cell->Vertices.end(), firstVertice);
-
-                    if (it == cell->Vertices.end())
-                        continue;
-
-                    secondVertice = cell2D->Vertices[next];
-
-                    it = find(cell->Vertices.begin(), cell->Vertices.end(), secondVertice);
-
-                    if(it == cell->Vertices.end())
-                        continue;
-
-                    break;
-                }
-
-                newCell2DVertices.push_back(firstVertice);
-
-                if(cell->IsOld)
-                {
-                    newCell2DVertices.push_back(cell->CuttedBy);
-
-                    unsigned int firstEdge = 0;
-                    unsigned int secondEdge = 0;
-
-                    for(Cell1D &newEdge : newEdges)
-                    {
-                        if(newEdge.Vertices[0] == cell->CuttedBy && newEdge.Vertices[1] == firstVertice)
-                        {
-                            firstEdge = newEdge.Id;
-                        }
-                        else if(newEdge.Vertices[0] == secondVertice && newEdge.Vertices[1] == cell->CuttedBy)
-                        {
-                            secondEdge = newEdge.Id;
-                        }
-                    }
-
-                    newCell2DEdges.push_back(firstEdge);
-                    newCell2DEdges.push_back(secondEdge);
-                }
-                else
-                {
-                    newCell2DEdges.push_back(i);
-                }
-            }
-
             cell2D->IsOld = true;
 
-            Cell2D newCell2D;
-            newCell2D.Id = idCell2D++;
-            newCell2D.NumberVertices = newCell2DVertices.size();
-            newCell2D.Vertices = newCell2DVertices;
-            newCell2D.NumberEdges = newCell2DEdges.size();
-            newCell2D.Edges = newCell2DEdges;
-
-            PM.NumberCell2D++;
-            PM.Cells2D.push_back(newCell2D);
+            CreateLastCell(PM, idCell2D, cell2D, newEdges);
         }
     }
 }
 
-void ImportMesh(PolygonalMesh &PM,
+void GenerateMesh(PolygonalMesh &PM,
                 const FractureLibrary::Fracture &f,
                 const double &tol)
 {
@@ -550,7 +589,7 @@ void ImportMesh(PolygonalMesh &PM,
 
     bool pass = true;
 
-    for(const FractureLibrary::Trace &t : f.pTraces)
+    for(const FractureLibrary::Trace &t : f.PassTraces)
     {
         if(t.IsOnEdge.at(f.Id))
             continue;
@@ -560,7 +599,7 @@ void ImportMesh(PolygonalMesh &PM,
 
     pass = false;
 
-    for(const FractureLibrary::Trace &t : f.nTraces)
+    for(const FractureLibrary::Trace &t : f.NotPassTraces)
     {
         if(t.IsOnEdge.at(f.Id))
             continue;

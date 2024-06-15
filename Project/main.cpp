@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "DFN.hpp"
+#include <DFN.hpp>
 #include "src_mesh/PolygonalMesh.hpp"
 
 
@@ -14,7 +14,7 @@ int main(int argc, char ** argv)
 {
     FractureLibrary::DFN dfn;
 
-    if(argc == 1)
+    if(argc == 1) // Non ho passato alcun file
         return 1;
 
     std::istringstream str(argv[1]);
@@ -22,14 +22,14 @@ int main(int argc, char ** argv)
     str >> name;
     std::string fileName = "./DFN/"  + name + ".txt";
 
-    double tol = 10 * numeric_limits<double>::epsilon(); //tolleranza di default
+    double tol = 10 * numeric_limits<double>::epsilon(); // Tolleranza di default
 
-    if(argc == 3)//se viene inserita in command line la tolleranza
+    if(argc == 3) // Se viene inserita in command line la tolleranza
     {
         std::istringstream conv(argv[2]);
         double tol_input;
         conv >> tol_input;
-        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); //scelgo la tol più alta tra default e input
+        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); // Scelgo la tol più alta tra default e input
     }
 
     if(!ReadDFN(fileName,
@@ -51,7 +51,7 @@ int main(int argc, char ** argv)
     for(unsigned int i = 0; i < dfn.NumberFractures; i++)
     {
         PolygonalLibrary::PolygonalMesh PM;
-        ImportMesh(PM, dfn.Fractures[i], tol);
+        GenerateMesh(PM, dfn.Fractures[i], tol);
 
         allPM.push_back(PM);
     }

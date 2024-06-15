@@ -301,11 +301,12 @@ void WriteOutputFiles(const std::string &outputTracesFile,
             for(unsigned int j = 0; j < 3; j++)
             {
                 if(i != 1 || j != 2)
-                    tracesFile << trace.EndpointsCoordinates(i, j) << "; ";
+                    tracesFile << setprecision(16) << scientific << trace.EndpointsCoordinates(i, j) << "; ";
             }
         }
 
-        tracesFile << trace.EndpointsCoordinates(1, 2) << endl;
+        tracesFile << setprecision(16) << scientific << trace.EndpointsCoordinates(1, 2) << endl;
+        tracesFile << endl;
     }
 
     tracesFile.close();
@@ -324,12 +325,12 @@ void WriteOutputFiles(const std::string &outputTracesFile,
 
         for(const Trace &t : f.NotPassTraces)
         {
-            tipsFile << t.Id << "; true; " << t.Length << endl;
+            tipsFile << t.Id << "; true; " << setprecision(16) << scientific << t.Length << endl;
         }
 
         for(const Trace &t : f.PassTraces)
         {
-            tipsFile << t.Id << "; false; " << t.Length << endl;
+            tipsFile << t.Id << "; false; " << setprecision(16) << scientific << t.Length << endl;
         }
 
         tipsFile << endl;

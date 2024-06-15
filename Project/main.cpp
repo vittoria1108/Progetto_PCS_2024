@@ -56,5 +56,20 @@ int main(int argc, char ** argv)
         allPM.push_back(PM);
     }
 
+    unsigned int counter = 1;
+
+    for(Cell2D &cell : allPM[0].Cells2D)
+    {
+        if(!cell.IsOld)
+        {
+            cout << "Cella " << counter++ << ":" << endl;
+
+            for(unsigned int i : cell.Vertices)
+            {
+                cout << allPM[0].Cells0D[i].Coordinates[0] << "; " << allPM[0].Cells0D[i].Coordinates[1] << "; " << allPM[0].Cells0D[i].Coordinates[2] << endl;
+            }
+        }
+    }
+
     return 0;
 }

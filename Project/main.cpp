@@ -4,6 +4,7 @@
 #include "Utils.hpp"
 #include "dfn.hpp"
 #include <iomanip>
+#include <chrono>
 
 
 using namespace std;
@@ -60,6 +61,29 @@ int main(int argc, char ** argv)
         }
     }
 
+    /*
+    unsigned int num_iter = 10;
+
+    double average = 0;
+
+    for(unsigned int k = 0; k < num_iter; k++)
+    {
+        std::chrono::steady_clock::time_point t_begin = std::chrono::steady_clock::now();
+        ReadDFN(fileName,
+                dfn,
+                tol);
+        std::chrono::steady_clock::time_point t_end = std::chrono::steady_clock::now();
+
+        double duration = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_begin).count();
+
+        average += duration;
+    }
+
+    average = average/num_iter;
+
+    cout << "Average time: " << average << endl;
+    */
+
 
     string outputTracesFile = "Traces_" + name + ".txt";
     string outputTipsFile = "Tips_" + name + ".txt";
@@ -67,7 +91,6 @@ int main(int argc, char ** argv)
     WriteOutputFiles(outputTracesFile,
                      outputTipsFile,
                      dfn);
-
 
     return 0;
 }

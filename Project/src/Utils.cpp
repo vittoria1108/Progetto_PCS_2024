@@ -253,6 +253,89 @@ bool IntersectionFractureLine(const Fracture &f,
 }
 
 
+bool IntersectsEdges(Fracture &f1,
+                     Fracture &f2,
+                     Vector2d &beta_1,
+                     Vector2d &beta_2,
+                     Vector3d &p_r,
+                     Vector3d &t_r,
+                     const double tol)
+{
+    for(unsigned int i = 0; i < f1.NumberVertices; i++)
+    {
+        unsigned int index = 0;
+
+        unsigned int next1 = i == f1.NumberVertices - 1 ? 0 : i + 1;
+
+        // AB -> Lato prima frattura
+        Vector3d A = f1.VerticesCoordinates.col(i);
+        Vector3d B = f1.VerticesCoordinates.col(next1);
+
+        Vector3d line1 = B - A;
+
+        p_r = A;
+        t_r = line1;
+
+        for(unsigned int k = 0; k < 3; k++)
+        {
+            if(abs(t_r[k]) > tol)
+            {
+                index = k;
+                break;
+            }
+        }
+
+        line1 /= line1.norm();
+
+        for(unsigned int j = 0; j < f2.NumberVertices; j++)
+        {
+            unsigned int next2 = j == f2.NumberVertices - 1 ? 0 : j + 1;
+
+            // CD -> Lato seconda frattura
+            Vector3d C = f2.VerticesCoordinates.col(j);
+            Vector3d D = f2.VerticesCoordinates.col(next2);
+
+            Vector3d line2 = C - D;
+            line2 /= line2.norm();
+
+            if(abs(line1[0] - line2[0]) < tol &&
+                abs(line1[1] - line2[1]) < tol &&
+                abs(line1[2] - line2[2]) < tol)
+            {
+                beta_1[0] = (A[index] - p_r[index]) / t_r[index];
+                beta_1[1] = (B[index] - p_r[index]) / t_r[index];
+                beta_2[0] = (C[index] - p_r[index]) / t_r[index];
+                beta_2[1] = (D[index] - p_r[index]) / t_r[index];
+
+                sort(beta_1.begin(), beta_1.end());
+                sort(beta_2.begin(), beta_2.end());
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+
+bool SamePlane(Vector4d plane1,
+               Vector4d plane2,
+               const double tol)
+{
+    plane1 /= plane1.norm();
+    plane2 /= plane2.norm();
+
+    for(unsigned int i = 0; i < 4; i++)
+    {
+        if(abs(plane1[i] - plane2[i]) > tol)
+            return false;
+    }
+
+    return true;
+}
+
+
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,
                      Fracture &f2,
@@ -261,13 +344,14 @@ void CalculateTraces(DFN &dfn,
 {
     // Controllo che le circoferenze che contengono i due poligoni non si intersecano
 
+    /*
     double r1 = CalculateR(f1);
     double r2 = CalculateR(f2);
 
     double barDistance = CalculateSquareDistance(f1.Barycentre, f2.Barycentre);
-    if(barDistance - (r1*r1+r2*r2) > tol)       // le due fratture non si intersecano
+    if(barDistance - ((r1+r2)*(r1*r2)) > tol)       // le due fratture non si intersecano
         return;
-
+    */
 
     // Controllo che i piani contenenti i due poligoni non siano paralleli
     Vector4d plane1 = CalculatePlane(f1);
@@ -275,28 +359,30 @@ void CalculateTraces(DFN &dfn,
     Vector3d p_r;
     Vector3d t_r;
 
-    if(!FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
-        return;
-
-    // Controllo se la retta interseca le figure
-
     Vector2d beta_1 = {};
-
-    if(!IntersectionFractureLine(f1, p_r, t_r, beta_1, tol))
-        return;
-
     Vector2d beta_2 = {};
 
-    if(!IntersectionFractureLine(f2, p_r, t_r, beta_2, tol))
-        return;
+    if(FindIntersectionLine(plane1, plane2, p_r, t_r, tol))
+    {
+        // Controllo se la retta interseca le figure
 
+        if(!IntersectionFractureLine(f1, p_r, t_r, beta_1, tol))
+            return;
 
-    if(beta_1[1] < beta_2[0])
-        return;
+        if(!IntersectionFractureLine(f2, p_r, t_r, beta_2, tol))
+            return;
 
-    if(beta_2[1] < beta_1[0])
-        return;
+        if(beta_1[1] < beta_2[0])
+            return;
 
+        if(beta_2[1] < beta_1[0])
+            return;
+    }
+    else
+    {
+        if(!SamePlane(plane1, plane2, tol) || !IntersectsEdges(f1, f2, beta_1, beta_2, p_r, t_r, tol))
+            return;
+    }
 
     // Dopo aver effettuato tutti i controlli so che la traccia esiste, quindi la creo
 
@@ -329,6 +415,10 @@ void CalculateTraces(DFN &dfn,
 
 
     double squareLength = CalculateSquareDistance(endPoints.row(0), endPoints.row(1));
+
+    if(abs(squareLength) < tol)
+        return;
+
     trace.Length = sqrt(squareLength);
 
 
@@ -407,7 +497,8 @@ void WriteOutputFiles(const string &outputTracesFile,
         tipsFile << "# FractureId; NumTraces" << endl;
         tipsFile << f.Id << "; " << f.pTraces.size() + f.npTraces.size() << endl;
 
-        tipsFile << "# TraceId; Tips; Length" << endl;
+        if((f.npTraces.size() + f.pTraces.size()) != 0)
+            tipsFile << "# TraceId; Tips; Length" << endl;
 
         for(const Trace &t : f.npTraces)
         {

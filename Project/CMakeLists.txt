@@ -52,6 +52,7 @@ list(APPEND ${CMAKE_PROJECT_NAME}_TEST_includes ${src_test_includes})
 # File
 ###############################################################################
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src_test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Create executable
 ################################################################################

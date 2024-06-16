@@ -46,6 +46,19 @@ bool IntersectionFractureLine(const Fracture &f,
                               const double &tol);
 
 
+bool IntersectsEdges(Fracture &f,
+                     Vector2d &beta_1,
+                     Vector2d &beta_2,
+                     Vector3d &p_r,
+                     Vector3d &t_r,
+                     const double tol);
+
+
+bool SamePlane(const Vector4d plane1,
+               const Vector4d plane2,
+               const double tol);
+
+
 // calcola le tracce
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,

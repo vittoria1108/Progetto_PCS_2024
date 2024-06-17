@@ -318,7 +318,6 @@ void CreateNewCells(PolygonalMesh &PM,
     unsigned int indexCell2D = 0;
 
     std::list<unsigned int> cells2D;
-    std::list<unsigned int> intersectedCells2D;
 
     Eigen::Vector2d betaTemp = {};
 
@@ -345,7 +344,6 @@ void CreateNewCells(PolygonalMesh &PM,
         }
 
         Cell2D *cell2D = &PM.Cells2D[indexCell2D];
-        intersectedCells2D.push_back(cell2D->Id);
 
         std::vector<unsigned int> indexIntersectedCell1D = {};
 
@@ -515,7 +513,7 @@ void CreateNewCells(PolygonalMesh &PM,
                     firstCell2DEdges.push_back(firstCell1D.Id);
 
                     indexNewEdge = firstCell2DEdges.size(); // Salvo la posizione nella quale dovrò aggiungere la cella 1D della traccia
-                    firstCell2DEdges.push_back(firstCell1D.Id);
+                    firstCell2DEdges.push_back(-1);
 
                     secondCell2DEdges.push_back(secondCell1D.Id);
                 }
@@ -548,9 +546,7 @@ void CreateNewCells(PolygonalMesh &PM,
         {
             for(unsigned int j : PM.Cells1D[i].NearCells2D)
             {
-                auto it = find(intersectedCells2D.begin(), intersectedCells2D.end(), j);
-
-                if (it == intersectedCells2D.end())
+                if(!PM.Cells2D[j].IsOld)
                     cells2D.push_back(j);
             }
         }

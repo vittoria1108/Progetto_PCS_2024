@@ -1,4 +1,5 @@
 #include "src_test/TestDFN.hpp"
+#include "UCD_test.hpp"
 
 int main(int argc, char ** argv)
 {

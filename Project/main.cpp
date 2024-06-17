@@ -86,7 +86,6 @@ int main(int argc, char ** argv)
     for(unsigned int i = 0; i < allPM.size(); i++)
     {
         unsigned int counter = 0;
-        cout << "Id Fracture " << i << ": ";
 
         for(Cell2D &cell : allPM[i].Cells2D)
         {
@@ -99,6 +98,19 @@ int main(int argc, char ** argv)
         cout << counter << endl;
     }
 
+    /*for(Cell2D &cell : allPM[2].Cells2D)
+    {
+        if(!cell.IsOld)
+        {
+            cout << "Cella " << cell.Id << ":" << endl;
+
+            for(unsigned int i : cell.Vertices)
+            {
+                cout << "Id cell0D: " << i << endl;
+                cout << allPM[2].Cells0D[i].Coordinates[0] << "; " << allPM[2].Cells0D[i].Coordinates[1] << "; " << allPM[2].Cells0D[i].Coordinates[2] << endl;
+            }
+        }
+    }*/
 
     return 0;
 }

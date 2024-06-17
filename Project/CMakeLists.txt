@@ -54,6 +54,11 @@ list(APPEND ${CMAKE_PROJECT_NAME}_MESH_sources ${src_mesh_sources})
 list(APPEND ${CMAKE_PROJECT_NAME}_MESH_headers ${src_mesh_headers})
 list(APPEND ${CMAKE_PROJECT_NAME}_MESH_includes ${src_mesh_includes})
 
+add_subdirectory(TestingParaviewCode/src)
+list(APPEND ${CMAKE_PROJECT_NAME}_sources ${src_paraview_sources})
+list(APPEND ${CMAKE_PROJECT_NAME}_headers ${src_paraview_headers})
+list(APPEND ${CMAKE_PROJECT_NAME}_includes ${src_paraview_includes})
+
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/DFN DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/src_test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 

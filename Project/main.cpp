@@ -81,20 +81,24 @@ int main(int argc, char ** argv)
         allPM.push_back(PM);
     }
 
-    unsigned int counter = 1;
 
-    for(Cell2D &cell : allPM[0].Cells2D)
+
+    for(unsigned int i = 0; i < allPM.size(); i++)
     {
-        if(!cell.IsOld)
-        {
-            cout << "Cella " << counter++ << ":" << endl;
+        unsigned int counter = 0;
+        cout << "Id Fracture " << i << ": ";
 
-            for(unsigned int i : cell.Vertices)
+        for(Cell2D &cell : allPM[i].Cells2D)
+        {
+            if(!cell.IsOld)
             {
-                cout << allPM[0].Cells0D[i].Coordinates[0] << "; " << allPM[0].Cells0D[i].Coordinates[1] << "; " << allPM[0].Cells0D[i].Coordinates[2] << endl;
+                counter++;
             }
         }
+
+        cout << counter << endl;
     }
+
 
     return 0;
 }

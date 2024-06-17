@@ -323,14 +323,14 @@ void WriteOutputFiles(const std::string &outputTracesFile,
         if(totalSize != 0)
             tipsFile << "# TraceId; Tips; Length" << std::endl;
 
-        for(const Trace &t : f.NotPassTraces)
-        {
-            tipsFile << t.Id << "; true; " << setprecision(16) << scientific << t.Length << std::endl;
-        }
-
         for(const Trace &t : f.PassTraces)
         {
             tipsFile << t.Id << "; false; " << setprecision(16) << scientific << t.Length << std::endl;
+        }
+
+        for(const Trace &t : f.NotPassTraces)
+        {
+            tipsFile << t.Id << "; true; " << setprecision(16) << scientific << t.Length << std::endl;
         }
 
         tipsFile << std::endl;

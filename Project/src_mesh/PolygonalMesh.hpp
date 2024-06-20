@@ -26,7 +26,7 @@ struct Cell1D {
     Eigen::Vector2i Vertices = {};
 
     bool IsOld = false;
-    unsigned int CuttedBy = -1;
+    std::vector<unsigned int> ReplacedBy = {};
 
     std::list<unsigned int> NearCells2D = {};
 

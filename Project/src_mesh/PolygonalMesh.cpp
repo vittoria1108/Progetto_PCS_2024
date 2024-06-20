@@ -253,36 +253,28 @@ void CreateLastCell(PolygonalMesh &PM,
 
         if(cell->IsOld)
         {
-            newCell2DVertices.push_back(cell->CuttedBy);
+            unsigned int firstEdgeId = cell->ReplacedBy[0];
+            unsigned int secondEdgeId = cell->ReplacedBy[1];
 
-            Vector2i firstEdge = {cell->CuttedBy, firstVertice};
-            Vector2i secondEdge = {secondVertice, cell->CuttedBy};
+            Cell1D *firstEdge = &PM.Cells1D[firstEdgeId];
+            Cell1D *secondEdge = &PM.Cells1D[secondEdgeId];
 
-            unsigned int firstEdgeId;
-            unsigned int secondEdgeId;
+            auto it = find(firstEdge->Vertices.begin(), firstEdge->Vertices.end(), firstVertice);
 
-            unsigned int counter = 0;
-
-            for(unsigned int k = 0; k < PM.NumberCell1D; k++)
+            if(it == firstEdge->Vertices.end())
             {
-                Cell1D *newEdge = &PM.Cells1D[k];
+                firstEdgeId = cell->ReplacedBy[1];
+                secondEdgeId = cell->ReplacedBy[0];
 
-                if(newEdge->Vertices == firstEdge)
-                {
-                    counter++;
-                    newEdge->NearCells2D.push_back(newCell2D.Id);
-                    firstEdgeId = newEdge->Id;
-                }
-                else if(newEdge->Vertices == secondEdge)
-                {
-                    counter++;
-                    newEdge->NearCells2D.push_back(newCell2D.Id);
-                    secondEdgeId = newEdge->Id;
-                }
-
-                if(counter == 2)
-                    break;
+                firstEdge = &PM.Cells1D[firstEdgeId];
+                secondEdge = &PM.Cells1D[secondEdgeId];
             }
+
+            unsigned int newVertice = firstEdgeId == firstEdge->Vertices[0] ? firstEdge->Vertices[1] : firstEdge->Vertices[0];
+            newCell2DVertices.push_back(newVertice);
+
+            firstEdge->NearCells2D.push_back(newCell2D.Id);
+            secondEdge->NearCells2D.push_back(newCell2D.Id);
 
             newCell2DEdges.push_back(firstEdgeId);
             newCell2DEdges.push_back(secondEdgeId);
@@ -472,7 +464,7 @@ void CreateNewCells(PolygonalMesh &PM,
                                 break;
                         }
 
-                        cell1D->CuttedBy = newCell0D.Id;
+                        cell1D->ReplacedBy = {firstCell1D.Id, secondCell1D.Id};
                     }
                 }
                 else
@@ -489,18 +481,19 @@ void CreateNewCells(PolygonalMesh &PM,
                     secondCell2DVertices.push_back(newCell0D.Id);
 
                     cell1D->IsOld = true;
-                    cell1D->CuttedBy = newCell0D.Id;
 
                     firstCell1D.Id = idCell1D++;
                     firstCell1D.Vertices = {firstCell0D.Id, newCell0D.Id};
-
-                    PM.NumberCell1D++;
-                    PM.Cells1D.push_back(firstCell1D);
 
                     newEdges.push_back(firstCell1D);
 
                     secondCell1D.Id = idCell1D++;
                     secondCell1D.Vertices = {newCell0D.Id, secondCell0D.Id};
+
+                    cell1D->ReplacedBy = {firstCell1D.Id, secondCell1D.Id};
+
+                    PM.NumberCell1D++;
+                    PM.Cells1D.push_back(firstCell1D);
 
                     PM.NumberCell1D++;
                     PM.Cells1D.push_back(secondCell1D);

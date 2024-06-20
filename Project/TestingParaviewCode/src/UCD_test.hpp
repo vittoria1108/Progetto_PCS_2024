@@ -4,7 +4,7 @@
 #include "UCDUtilities.hpp"
 #include <gtest/gtest.h>
 
-/*
+
 // ***************************************************************************
 TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
 {
@@ -31,10 +31,10 @@ TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
 
 
 }
-*/
+
 
 // ***************************************************************************
-/*TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
+TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
 {
     std::string exportFolder = "./";
 
@@ -65,10 +65,10 @@ TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
                             points3,
                             edges3);
 }
-*/
 
-/*
-TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
+
+
+/*TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
 {
     std::string exportFolder = "./";
 
@@ -125,10 +125,10 @@ TEST(TestUCDUtilities, UCDUtilities_Test0Ds)
     exporter.ExportPoints(exportFolder + "/Geometry100Ds.inp",
                           points10);
 
-} */
+}
 
 // ***************************************************************************
-/*
+
 TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
 {
     std::string exportFolder = "./";
@@ -217,10 +217,10 @@ TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
                             points10,
                             edges10);
 
-}
-*/
+}*/
+
 // ***************************************************************************
-/*TEST(TestUCDUtilities, UCDUtilities_Test2Ds)
+TEST(TestUCDUtilities, UCDUtilities_Test2Ds)
 {
     std::string exportFolder = "./";
 
@@ -231,7 +231,7 @@ TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
     const std::vector<std::vector<unsigned int>> polygons =
         {
             { 0, 1, 2, 3 },
-            { 4, 0, 5, 6},
+            { 4, 0, 5, 6 },
             { 5, 3, 7, 6 }
         };
 
@@ -240,5 +240,5 @@ TEST(TestUCDUtilities, UCDUtilities_Test1Ds)
                             polygons);
 }
 // ***************************************************************************
-*/
+
 #endif // __UCD_test_HPP__

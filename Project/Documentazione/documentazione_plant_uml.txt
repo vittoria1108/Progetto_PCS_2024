@@ -59,9 +59,9 @@ TestCalculateTraces
 
 }
 
-DFN "many" --o "1" Fracture : is made up
-DFN "many" --o "1" Trace : is made up
-Fracture "many" --o "2" Trace : contains
+DFN "1" o-- "many" Fracture : is made up of
+DFN "1" o-- "many" Trace : is made up of
+Fracture "1" o-- "many" Trace : contains
 
 package PolygonalLibrary <<Folder>>
 {
@@ -118,8 +118,8 @@ class Cell2D
 bool CellContainsTrace(PM, cell, p_r, t_r, beta, tol)
 }
 
-PolygonalMesh "1" --o "many" Cell0D : is made up
-PolygonalMesh "1" --o "many" Cell1D : is made up
-PolygonalMesh "1" --o "many" Cell2D : is made up
+PolygonalMesh "1" o-- "many" Cell0D : is made up of
+PolygonalMesh "1" o-- "many" Cell1D : is made up of
+PolygonalMesh "1" o-- "many" Cell2D : is made up of
 }
 @enduml

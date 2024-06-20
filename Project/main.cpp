@@ -1,36 +1,36 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include "Utils.hpp"
-#include "dfn.hpp"
-#include <iomanip>
-#include <chrono>
+#include <DFN.hpp>
+#include "src_mesh/PolygonalMesh.hpp"
 
 
 using namespace std;
 using namespace DFNLibrary;
+using namespace PolygonalLibrary;
 
 
 int main(int argc, char ** argv)
 {
-    if(argc == 1)
+    DFNLibrary::DFN dfn;
+
+    if(argc == 1) // Non ho passato alcun file
         return 1;
 
-    istringstream str(argv[1]);
-    string name;
+    std::istringstream str(argv[1]);
+    std::string name;
     str >> name;
-    string fileName = "./DFN/"  + name + ".txt";
+    std::string fileName = "./DFN/"  + name + ".txt";
 
-    double tol = 10 * numeric_limits<double>::epsilon();   //tolleranza di default
-    if(argc == 3)  //se viene inserita in command line la tolleranza
+    double tol = 10 * numeric_limits<double>::epsilon(); // Tolleranza di default
+
+    if(argc == 3) // Se viene inserita in command line la tolleranza
     {
-        istringstream conv(argv[2]);
+        std::istringstream conv(argv[2]);
         double tol_input;
         conv >> tol_input;
-        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); //scelgo la tol più alta tra default e input
+        tol = max(tol_input, 10 * numeric_limits<double>::epsilon()); // Scelgo la tol più alta tra default e input
     }
-
-    DFN dfn;
 
     if(!ReadDFN(fileName,
                 dfn,
@@ -38,31 +38,16 @@ int main(int argc, char ** argv)
     {
         return 2;
     }
-    else
-    {
-        cout << "Numero di fratture:" << " " << dfn.NumberFractures << endl;
-        cout << endl;
 
-        for(unsigned int i=0; i<dfn.NumberFractures; i++)
-        {
-            cout << "Id:" << " " << dfn.Fractures[i].Id << endl;
-            cout << "Vertices:" << " " << dfn.Fractures[i].NumberVertices << endl;
+    std::string outputTracesFile = "Traces_" + name + ".txt";
+    std::string outputTipsFile = "Tips_" + name + ".txt";
 
-            for(unsigned int j = 0; j < 3; j++)
-            {
-                cout << "[";
-                for(unsigned int k = 0; k < dfn.Fractures[i].NumberVertices; k++)
-                {
-                    cout << scientific << setprecision(16) << dfn.Fractures[i].VerticesCoordinates(j,k) << " ";
-                }
-                cout << "]" << endl;
-            }
-            cout << endl;
-        }
-    }
+    WriteOutputFiles(outputTracesFile,
+                     outputTipsFile,
+                     dfn);
 
-    /*
-    unsigned int num_iter = 10;
+
+    /*unsigned int num_iter = 10;
 
     double average = 0;
 
@@ -77,20 +62,55 @@ int main(int argc, char ** argv)
         double duration = std::chrono::duration_cast<std::chrono::microseconds>(t_end - t_begin).count();
 
         average += duration;
+        std::cout << duration << std::endl;
     }
 
+    std::cout << std::endl;
     average = average/num_iter;
 
-    cout << "Average time: " << average << endl;
-    */
+    std::cout << "Average time: " << average << std::endl;*/
 
 
-    string outputTracesFile = "Traces_" + name + ".txt";
-    string outputTipsFile = "Tips_" + name + ".txt";
+    std::vector<PolygonalLibrary::PolygonalMesh> allPM;
 
-    WriteOutputFiles(outputTracesFile,
-                     outputTipsFile,
-                     dfn);
+    for(unsigned int i = 0; i < dfn.NumberFractures; i++)
+    {
+        PolygonalLibrary::PolygonalMesh PM;
+        GenerateMesh(PM, dfn.Fractures[i], tol);
+
+        allPM.push_back(PM);
+    }
+
+
+
+    for(unsigned int i = 0; i < allPM.size(); i++)
+    {
+        unsigned int counter = 0;
+
+        for(Cell2D &cell : allPM[i].Cells2D)
+        {
+            if(!cell.IsOld)
+            {
+                counter++;
+            }
+        }
+
+        cout << "Id Fracture: " << i << "; Number Cells2D: " << counter << endl;
+    }
+
+    /*for(Cell2D &cell : allPM[2].Cells2D)
+    {
+        if(!cell.IsOld)
+        {
+            cout << "Cella " << cell.Id << ":" << endl;
+
+            for(unsigned int i : cell.Vertices)
+            {
+                cout << "Id cell0D: " << i << endl;
+                cout << allPM[2].Cells0D[i].Coordinates[0] << "; " << allPM[2].Cells0D[i].Coordinates[1] << "; " << allPM[2].Cells0D[i].Coordinates[2] << endl;
+            }
+        }
+    }*/
 
     return 0;
 }

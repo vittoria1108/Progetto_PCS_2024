@@ -56,7 +56,7 @@ bool CompareTraces(const Trace &t1,
 }
 
 
-bool ImportFracture(const std::string &fileName,
+bool ImportFractures(const std::string &fileName,
                     DFN &dfn)
 {
 
@@ -253,7 +253,7 @@ bool ReadDFN(const std::string &fileName,
              DFN &dfn,
              const double &tol)
 {
-    if(!ImportFracture(fileName,
+    if(!ImportFractures(fileName,
                         dfn))
         return false;
 

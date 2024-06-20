@@ -1,4 +1,4 @@
-#include "src_test/dfn_test.hpp"
+#include "src_test/TestDFN.hpp"
 #include <gtest/gtest.h>
 #include "UCD_test.hpp"
 

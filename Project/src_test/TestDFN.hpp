@@ -1,9 +1,8 @@
-#ifndef __DFN_TEST_HPP__
-#define __DFN_TEST_HPP__
+#ifndef __TESTDFN_H
+#define __TESTDFN_H
 
-#include "Utils.hpp"
-#include "dfn.hpp"
 #include <gtest/gtest.h>
+#include "DFN.hpp"
 #include "Eigen/Eigen"
 #include <iostream>
 
@@ -31,12 +30,12 @@ TEST(DFNTEST, TestCalculatePlaneFourVertices){
     MatrixXd verticesCoordinate(3, 4);
 
     verticesCoordinate << 2, 4, 5, 1,
-                         -3, -2, 2, 7,
-                          8, 7, 6, 7;
+        -3, -2, 2, 7,
+        8, 7, 6, 7;
 
     f.VerticesCoordinates = verticesCoordinate;
 
-    Vector4d plane = CalculatePlane(f);
+    Vector4d plane = f.CalculatePlane();
     plane /= plane.norm();
 
     Vector4d rightPlane = {3, 1, 7, 59};
@@ -53,13 +52,13 @@ TEST(DFNTEST, TestCalculatePlaneFiveVertices){
     MatrixXd verticesCoordinate(3, 5);
 
     verticesCoordinate << 1, 0.81, -0.31, -0.81, 0.31,
-                          0, 0.51, 0.82, -0.51, -0.82,
-                          0, 0.29, 0.48, -0.29, -0.48;
+        0, 0.51, 0.82, -0.51, -0.82,
+        0, 0.29, 0.48, -0.29, -0.48;
     f.VerticesCoordinates = verticesCoordinate;
 
     f.VerticesCoordinates = verticesCoordinate;
 
-    Vector4d plane = CalculatePlane(f);
+    Vector4d plane = f.CalculatePlane();
     plane /= plane.norm();
 
     Vector4d rightPlane = {0, -0.29, 0.51, 0};
@@ -79,14 +78,14 @@ TEST(DFNTEST, TestCalculateR){
     MatrixXd verticesCoordinate(3, 3);
 
     verticesCoordinate << -2, -5, -2,
-                          -3, -2, 2,
-                           1, 2, 0;
+        -3, -2, 2,
+        1, 2, 0;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d barycentre = f.VerticesCoordinates.rowwise().mean();
     f.Barycentre = barycentre;
 
-    double r = CalculateR(f);
+    double r = f.CalculateR();
 
     EXPECT_NEAR(r, 3.32, 0.01);
 }
@@ -102,8 +101,8 @@ TEST(DFNTEST, TestIntersectionTrue){
     MatrixXd verticesCoordinate(3, 3);
 
     verticesCoordinate << 2, 1, 4,
-                          4, 1, 1,
-                          3, 2, 1;
+        4, 1, 1,
+        3, 2, 1;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {1, 1, 2};
@@ -111,10 +110,11 @@ TEST(DFNTEST, TestIntersectionTrue){
 
     Vector2d beta;
 
-    bool intersection = IntersectionFractureLine(f, p_r, t_r, beta, tol);
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_TRUE(intersection);
-
 }
 
 TEST(DFNTEST, TestIntersectionVerticeFalse){
@@ -127,8 +127,8 @@ TEST(DFNTEST, TestIntersectionVerticeFalse){
     MatrixXd verticesCoordinate(3, 4);
 
     verticesCoordinate << -2.34, -6.83, -5.5, -1.02,
-                          1.16, 2.49, 6.98, 5.65,
-                          0, 0, 0, 0;
+        1.16, 2.49, 6.98, 5.65,
+        0, 0, 0, 0;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {-6.83, 2.49, 0};
@@ -136,7 +136,9 @@ TEST(DFNTEST, TestIntersectionVerticeFalse){
 
     Vector2d beta;
 
-    bool intersection = IntersectionFractureLine(f, p_r, t_r, beta, tol);;
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_FALSE(intersection);
 }
@@ -151,8 +153,8 @@ TEST(DFNTEST, TestIntersectionFalse){
     MatrixXd verticesCoordinate(3, 5);
 
     verticesCoordinate << 1, 0.81, -0.31, -0.81, 0.31,
-                          0, 0.51, 0.82, -0.51, -0.82,
-                          0, 0.29, 0.48, -0.29, -0.48;
+        0, 0.51, 0.82, -0.51, -0.82,
+        0, 0.29, 0.48, -0.29, -0.48;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {-1.89, 0, 0};
@@ -160,10 +162,11 @@ TEST(DFNTEST, TestIntersectionFalse){
 
     Vector2d beta;
 
-    bool intersection = IntersectionFractureLine(f, p_r, t_r, beta, tol);;
+    map<unsigned int, bool> isOnEdge = {};
+
+    bool intersection = f.IntersectsLine(p_r, t_r, beta, isOnEdge, tol);
 
     EXPECT_FALSE(intersection);
-
 }
 
 //****************************************************************
@@ -223,20 +226,20 @@ TEST(DFNTEST, TestReadDFNTrue){
     MatrixXd f1Vertices(3, 4);
 
     f1Vertices << 2, 4, 3.49, 1,
-                  -3, -2, 7.35, 7,
-                   8, 7, 6, 7;
+        -3, -2, 7.35, 7,
+        8, 7, 6, 7;
 
     MatrixXd f2Vertices(3, 3);
 
     f2Vertices << 2, 6, -2,
-                  2, 2, 2,
-                  4, 7, 7;
+        2, 2, 2,
+        4, 7, 7;
 
     MatrixXd f3Vertices(3, 3);
 
     f3Vertices << 2, 3.22, 2,
-                  2, 2, -3,
-                  7, 4.915, 4;
+        2, 2, -3,
+        7, 4.915, 4;
 
     EXPECT_EQ(dfn.NumberFractures, 3);
 
@@ -262,14 +265,14 @@ TEST(DFNTEST, TestReadDFNTrue){
     EXPECT_NEAR(dfn.Traces[0].Length, 1.07, 0.1);
     EXPECT_NEAR(dfn.Traces[1].Length, 2.43, 0.1);
 
-    EXPECT_EQ(dfn.Fractures[0].npTraces.size(), 1);
-    EXPECT_EQ(dfn.Fractures[0].pTraces.size(), 0);
+    EXPECT_EQ(dfn.Fractures[0].NotPassTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[0].PassTraces.size(), 0);
 
-    EXPECT_EQ(dfn.Fractures[1].npTraces.size(), 1);
-    EXPECT_EQ(dfn.Fractures[1].pTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[1].NotPassTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[1].PassTraces.size(), 1);
 
-    EXPECT_EQ(dfn.Fractures[2].npTraces.size(), 0);
-    EXPECT_EQ(dfn.Fractures[2].pTraces.size(), 1);
+    EXPECT_EQ(dfn.Fractures[2].NotPassTraces.size(), 0);
+    EXPECT_EQ(dfn.Fractures[2].PassTraces.size(), 1);
 
     EXPECT_TRUE(success);
 }
@@ -286,22 +289,20 @@ TEST(DFNTEST, TestReadDFNFalse){
 }
 
 //****************************************************************
-TEST(DFNTEST, TestImportFracture){
+TEST(DFNTEST, TestImportFractures){
 
     const string fileName = "./src_test/Test_Fracture.txt";
     DFN dfn;
 
-    bool success = ImportFracture(fileName, dfn);
+    bool success = ImportFractures(fileName, dfn);
 
     MatrixXd vertices(3, 5);
 
     vertices << 2, 4, 6.5, 0.97, -0.6,
-                2, 2, 3.8, 5.73, 3.9,
-                0, 0, 1, 2.07, 1.05;
+        2, 2, 3.8, 5.73, 3.9,
+        0, 0, 1, 2.07, 1.05;
 
     Vector3d barycentre = vertices.rowwise().mean();
-
-    EXPECT_TRUE(success);
 
     EXPECT_EQ(dfn.Fractures[0].Id, 0);
     EXPECT_EQ(dfn.Fractures[0].NumberVertices, 5);
@@ -318,12 +319,14 @@ TEST(DFNTEST, TestImportFracture){
     {
         EXPECT_NEAR(dfn.Fractures[0].Barycentre[i], barycentre[i], 0.1);
     }
+
+    EXPECT_TRUE(success);
 }
 
 //****************************************************************
-TEST(DFNTEST, CalculateTracesSamePlane){
+TEST(DFNTEST, TestCalculateTracesSamePlane){
 
-    double tol = 1e-04;
+    double tol = 10 * numeric_limits<double>::epsilon();
 
     DFN dfn;
     dfn.NumberFractures = 2;
@@ -334,8 +337,8 @@ TEST(DFNTEST, CalculateTracesSamePlane){
 
     MatrixXd f1Vertices(3,4);
     f1Vertices << -4.46, 7.87, 8.3, 2.49,
-                  -6.7, -49, -17.41, 4.3,
-                   0, 0, 0, 0;
+        -6.7, -49, -17.41, 4.3,
+        0, 0, 0, 0;
     f1.VerticesCoordinates = f1Vertices;
 
     Fracture f2;
@@ -344,8 +347,8 @@ TEST(DFNTEST, CalculateTracesSamePlane){
 
     MatrixXd f2Vertices(3, 3);
     f2Vertices << 19.86, -16.89, -51.13,
-                 -90.13, 35.94, -65.07,
-                  0, 0, 0;
+        -90.133576642335768, 35.943065693430647, -65.07,
+        0, 0, 0;
     f2.VerticesCoordinates = f2Vertices;
 
     dfn.Fractures.push_back(f1);
@@ -355,7 +358,7 @@ TEST(DFNTEST, CalculateTracesSamePlane){
     Vector2i fracturesIds = {0, 1};
     MatrixXd endpointsCoordinates(2, 3);
     endpointsCoordinates << -4.46, -6.7, 0,
-                             7.87, -49, 0;
+        7.87, -49, 0;
     double length = 44.06;
 
     CalculateTraces(dfn, f1, f2, id, tol);
@@ -383,7 +386,7 @@ TEST(DFNTEST, CalculateTracesSamePlane){
     EXPECT_TRUE(f2.Tips[t.Id]);
 }
 
-TEST(DFNTEST, CalculateTracesFalse){
+TEST(DFNTEST, TestCalculateTracesFalse){
 
     double tol = 10 * numeric_limits<double>::epsilon();
 
@@ -396,8 +399,8 @@ TEST(DFNTEST, CalculateTracesFalse){
 
     MatrixXd f1Vertices(3,4);
     f1Vertices << 9.5, 8, -4.94, 5,
-                  1.1, -7, -6.56, 5,
-                  -6, -3.2, 5, -4;
+        1.1, -7, -6.56, 5,
+        -6, -3.2, 5, -4;
     f1.VerticesCoordinates = f1Vertices;
 
     Fracture f2;
@@ -406,8 +409,8 @@ TEST(DFNTEST, CalculateTracesFalse){
 
     MatrixXd f2Vertices(3, 4);
     f2Vertices << 26, 3.88, 6.49, 20,
-                  50.2, 71.57, 76.7, 60.7,
-                  1, 0, 9.51, 6.5;
+        50.2, 71.57, 76.7, 60.7,
+        1, 0, 9.51, 6.5;
     f2.VerticesCoordinates = f2Vertices;
 
     dfn.Fractures.push_back(f1);
@@ -425,6 +428,7 @@ TEST(DFNTEST, CalculateTracesFalse){
 TEST(DFNTEST, TestCalculatePTraces){
 
     double tol = 10 * numeric_limits<double>::epsilon();
+
     DFN dfn;
     dfn.NumberFractures = 2;
 
@@ -434,8 +438,8 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd verticesCoordinates1(3, 3);
 
     verticesCoordinates1 << 2, 6, -2,
-                           2, 2, 2,
-                           4, 7, 7;
+        2, 2, 2,
+        4, 7, 7;
     f1.VerticesCoordinates = verticesCoordinates1;
 
     Fracture f2;
@@ -444,8 +448,8 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd verticesCoordinates2(3, 3);
 
     verticesCoordinates2 << 2, 3.22, 2,
-                           2, 2, -3,
-                           7, 4.915, 4;
+        2, 2, -3,
+        7, 4.915, 4;
     f2.VerticesCoordinates = verticesCoordinates2;
 
     dfn.Fractures.push_back(f1);
@@ -460,7 +464,7 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd endPoints(2, 3);
 
     endPoints << 2, 2, 7,
-                 3.22, 2, 4.915;
+        3.22, 2, 4.915;
 
 
     EXPECT_EQ(t.Id, 0);
@@ -472,9 +476,9 @@ TEST(DFNTEST, TestCalculatePTraces){
 
     for(unsigned int i = 0; i < 2; i++)
     {
-        for(unsigned int j=0; j<3; j++)
+        for(unsigned int j = 0; j < 3; j++)
         {
-            EXPECT_NEAR(t.EndpointsCoordinates(i,j), endPoints(i,j), 0.5);
+            EXPECT_NEAR(t.EndpointsCoordinates(i, j), endPoints(i, j), 0.5);
         }
     }
 
@@ -488,6 +492,7 @@ TEST(DFNTEST, TestCalculatePTraces){
 TEST(DFNTEST, TestCalculateNpTraces){
 
     double tol = 10 * numeric_limits<double>::epsilon();
+
     DFN dfn;
     dfn.NumberFractures = 2;
 
@@ -497,8 +502,8 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd verticesCoordinates1(3, 3);
 
     verticesCoordinates1 << 2, 6, -2,
-                            2, 2, 2,
-                            4, 7, 7;
+        2, 2, 2,
+        4, 7, 7;
     f1.VerticesCoordinates = verticesCoordinates1;
 
     Fracture f2;
@@ -507,8 +512,8 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd verticesCoordinates2(3, 4);
 
     verticesCoordinates2 << 2, 4, 3.49, 1,
-                            -3, -2, 7.35, 7,
-                             8, 7, 6, 7;
+        -3, -2, 7.35, 7,
+        8, 7, 6, 7;
     f2.VerticesCoordinates = verticesCoordinates2;
 
     dfn.Fractures.push_back(f1);
@@ -523,7 +528,7 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd endPoints(2, 3);
 
     endPoints << 3.78, 2, 6.57,
-                 2.8, 2, 7;
+        2.8, 2, 7;
 
 
     EXPECT_EQ(t.Id, 0);
@@ -533,11 +538,11 @@ TEST(DFNTEST, TestCalculateNpTraces){
         EXPECT_EQ(t.FracturesIds[i], fracturesIds[i]);
     }
 
-    for(unsigned int i=0; i<2; i++)
+    for(unsigned int i = 0; i < 2; i++)
     {
-        for(unsigned int j=0; j<3; j++)
+        for(unsigned int j = 0; j < 3; j++)
         {
-            EXPECT_NEAR(t.EndpointsCoordinates(i,j), endPoints(i,j), 0.5);
+            EXPECT_NEAR(t.EndpointsCoordinates(i, j), endPoints(i, j), 0.5);
         }
     }
 
@@ -550,4 +555,4 @@ TEST(DFNTEST, TestCalculateNpTraces){
 
 }
 
-#endif // __DFN_TEST_HPP__
+#endif

@@ -82,7 +82,6 @@ int main(int argc, char ** argv)
     }
 
 
-
     for(unsigned int i = 0; i < allPM.size(); i++)
     {
         unsigned int counter = 0;
@@ -95,7 +94,7 @@ int main(int argc, char ** argv)
             }
         }
 
-        cout << counter << endl;
+        cout << "Id Fracture: " << i << "; Number Cells2D: " << counter << endl;
     }
 
     /*for(Cell2D &cell : allPM[2].Cells2D)

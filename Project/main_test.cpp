@@ -1,3 +1,5 @@
+#include <gtest/gtest.h>
+
 #include "src_test/TestDFN.hpp"
 #include "UCD_test.hpp"
 

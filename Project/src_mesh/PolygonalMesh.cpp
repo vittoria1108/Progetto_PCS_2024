@@ -19,8 +19,8 @@ bool AlreadyExists(const Eigen::Vector3d &coordinates,
     for(Cell0D cell : PM.Cells0D)
     {
         if(abs(cell.Coordinates[0] - coordinates[0]) < tol &&
-            abs(cell.Coordinates[1] - coordinates[1]) < tol &&
-            abs(cell.Coordinates[2] - coordinates[2]) < tol)
+           abs(cell.Coordinates[1] - coordinates[1]) < tol &&
+           abs(cell.Coordinates[2] - coordinates[2]) < tol)
         {
             id = cell.Id;
             return true;
@@ -547,8 +547,8 @@ void CreateNewCells(PolygonalMesh &PM,
 }
 
 void GenerateMesh(PolygonalMesh &PM,
-                  const DFNLibrary::Fracture &f,
-                  const double &tol)
+                const DFNLibrary::Fracture &f,
+                const double &tol)
 {
 
     unsigned int idCell2D = 0;

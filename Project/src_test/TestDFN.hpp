@@ -30,8 +30,8 @@ TEST(DFNTEST, TestCalculatePlaneFourVertices){
     MatrixXd verticesCoordinate(3, 4);
 
     verticesCoordinate << 2, 4, 5, 1,
-        -3, -2, 2, 7,
-        8, 7, 6, 7;
+                          -3, -2, 2, 7,
+                          8, 7, 6, 7;
 
     f.VerticesCoordinates = verticesCoordinate;
 
@@ -52,8 +52,8 @@ TEST(DFNTEST, TestCalculatePlaneFiveVertices){
     MatrixXd verticesCoordinate(3, 5);
 
     verticesCoordinate << 1, 0.81, -0.31, -0.81, 0.31,
-        0, 0.51, 0.82, -0.51, -0.82,
-        0, 0.29, 0.48, -0.29, -0.48;
+                          0, 0.51, 0.82, -0.51, -0.82,
+                          0, 0.29, 0.48, -0.29, -0.48;
     f.VerticesCoordinates = verticesCoordinate;
 
     f.VerticesCoordinates = verticesCoordinate;
@@ -78,8 +78,8 @@ TEST(DFNTEST, TestCalculateR){
     MatrixXd verticesCoordinate(3, 3);
 
     verticesCoordinate << -2, -5, -2,
-        -3, -2, 2,
-        1, 2, 0;
+                          -3, -2, 2,
+                          1, 2, 0;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d barycentre = f.VerticesCoordinates.rowwise().mean();
@@ -101,8 +101,8 @@ TEST(DFNTEST, TestIntersectionTrue){
     MatrixXd verticesCoordinate(3, 3);
 
     verticesCoordinate << 2, 1, 4,
-        4, 1, 1,
-        3, 2, 1;
+                          4, 1, 1,
+                          3, 2, 1;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {1, 1, 2};
@@ -127,8 +127,8 @@ TEST(DFNTEST, TestIntersectionVerticeFalse){
     MatrixXd verticesCoordinate(3, 4);
 
     verticesCoordinate << -2.34, -6.83, -5.5, -1.02,
-        1.16, 2.49, 6.98, 5.65,
-        0, 0, 0, 0;
+                          1.16, 2.49, 6.98, 5.65,
+                          0, 0, 0, 0;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {-6.83, 2.49, 0};
@@ -153,8 +153,8 @@ TEST(DFNTEST, TestIntersectionFalse){
     MatrixXd verticesCoordinate(3, 5);
 
     verticesCoordinate << 1, 0.81, -0.31, -0.81, 0.31,
-        0, 0.51, 0.82, -0.51, -0.82,
-        0, 0.29, 0.48, -0.29, -0.48;
+                          0, 0.51, 0.82, -0.51, -0.82,
+                          0, 0.29, 0.48, -0.29, -0.48;
     f.VerticesCoordinates = verticesCoordinate;
 
     Vector3d p_r = {-1.89, 0, 0};
@@ -226,20 +226,20 @@ TEST(DFNTEST, TestReadDFNTrue){
     MatrixXd f1Vertices(3, 4);
 
     f1Vertices << 2, 4, 3.49, 1,
-        -3, -2, 7.35, 7,
-        8, 7, 6, 7;
+                  -3, -2, 7.35, 7,
+                  8, 7, 6, 7;
 
     MatrixXd f2Vertices(3, 3);
 
     f2Vertices << 2, 6, -2,
-        2, 2, 2,
-        4, 7, 7;
+                  2, 2, 2,
+                  4, 7, 7;
 
     MatrixXd f3Vertices(3, 3);
 
     f3Vertices << 2, 3.22, 2,
-        2, 2, -3,
-        7, 4.915, 4;
+                  2, 2, -3,
+                  7, 4.915, 4;
 
     EXPECT_EQ(dfn.NumberFractures, 3);
 
@@ -299,8 +299,8 @@ TEST(DFNTEST, TestImportFractures){
     MatrixXd vertices(3, 5);
 
     vertices << 2, 4, 6.5, 0.97, -0.6,
-        2, 2, 3.8, 5.73, 3.9,
-        0, 0, 1, 2.07, 1.05;
+                2, 2, 3.8, 5.73, 3.9,
+                0, 0, 1, 2.07, 1.05;
 
     Vector3d barycentre = vertices.rowwise().mean();
 
@@ -399,8 +399,8 @@ TEST(DFNTEST, TestCalculateTracesFalse){
 
     MatrixXd f1Vertices(3,4);
     f1Vertices << 9.5, 8, -4.94, 5,
-        1.1, -7, -6.56, 5,
-        -6, -3.2, 5, -4;
+                  1.1, -7, -6.56, 5,
+                  -6, -3.2, 5, -4;
     f1.VerticesCoordinates = f1Vertices;
 
     Fracture f2;
@@ -409,8 +409,8 @@ TEST(DFNTEST, TestCalculateTracesFalse){
 
     MatrixXd f2Vertices(3, 4);
     f2Vertices << 26, 3.88, 6.49, 20,
-        50.2, 71.57, 76.7, 60.7,
-        1, 0, 9.51, 6.5;
+                  50.2, 71.57, 76.7, 60.7,
+                  1, 0, 9.51, 6.5;
     f2.VerticesCoordinates = f2Vertices;
 
     dfn.Fractures.push_back(f1);
@@ -438,8 +438,8 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd verticesCoordinates1(3, 3);
 
     verticesCoordinates1 << 2, 6, -2,
-        2, 2, 2,
-        4, 7, 7;
+                            2, 2, 2,
+                            4, 7, 7;
     f1.VerticesCoordinates = verticesCoordinates1;
 
     Fracture f2;
@@ -448,8 +448,8 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd verticesCoordinates2(3, 3);
 
     verticesCoordinates2 << 2, 3.22, 2,
-        2, 2, -3,
-        7, 4.915, 4;
+                            2, 2, -3,
+                            7, 4.915, 4;
     f2.VerticesCoordinates = verticesCoordinates2;
 
     dfn.Fractures.push_back(f1);
@@ -464,7 +464,7 @@ TEST(DFNTEST, TestCalculatePTraces){
     MatrixXd endPoints(2, 3);
 
     endPoints << 2, 2, 7,
-        3.22, 2, 4.915;
+                 3.22, 2, 4.915;
 
 
     EXPECT_EQ(t.Id, 0);
@@ -502,8 +502,8 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd verticesCoordinates1(3, 3);
 
     verticesCoordinates1 << 2, 6, -2,
-        2, 2, 2,
-        4, 7, 7;
+                            2, 2, 2,
+                            4, 7, 7;
     f1.VerticesCoordinates = verticesCoordinates1;
 
     Fracture f2;
@@ -512,8 +512,8 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd verticesCoordinates2(3, 4);
 
     verticesCoordinates2 << 2, 4, 3.49, 1,
-        -3, -2, 7.35, 7,
-        8, 7, 6, 7;
+                            -3, -2, 7.35, 7,
+                            8, 7, 6, 7;
     f2.VerticesCoordinates = verticesCoordinates2;
 
     dfn.Fractures.push_back(f1);
@@ -528,7 +528,7 @@ TEST(DFNTEST, TestCalculateNpTraces){
     MatrixXd endPoints(2, 3);
 
     endPoints << 3.78, 2, 6.57,
-        2.8, 2, 7;
+                 2.8, 2, 7;
 
 
     EXPECT_EQ(t.Id, 0);

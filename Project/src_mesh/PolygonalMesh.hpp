@@ -129,8 +129,8 @@ void CreateNewCells(PolygonalMesh &PM,
                     const double &tol);
 
 void GenerateMesh(PolygonalMesh &PM,
-                  const DFNLibrary::Fracture &f,
-                  const double &tol);
+                const DFNLibrary::Fracture &f,
+                const double &tol);
 
 }
 

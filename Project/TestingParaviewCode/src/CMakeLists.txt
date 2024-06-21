@@ -8,4 +8,3 @@ list(APPEND src_includes ${CMAKE_CURRENT_SOURCE_DIR})
 set(src_paraview_sources ${src_sources} PARENT_SCOPE)
 set(src_paraview_headers ${src_headers} PARENT_SCOPE)
 set(src_paraview_includes ${src_includes} PARENT_SCOPE)
-

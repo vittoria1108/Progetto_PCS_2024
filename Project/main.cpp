@@ -6,13 +6,13 @@
 
 
 using namespace std;
-using namespace FractureLibrary;
+using namespace DFNLibrary;
 using namespace PolygonalLibrary;
 
 
 int main(int argc, char ** argv)
 {
-    FractureLibrary::DFN dfn;
+    DFNLibrary::DFN dfn;
 
     if(argc == 1) // Non ho passato alcun file
         return 1;

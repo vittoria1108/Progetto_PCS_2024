@@ -10,7 +10,7 @@ using namespace std;
 using namespace Eigen;
 
 
-namespace FractureLibrary{
+namespace DFNLibrary{
 
 double CalculateSquareDistance(const Eigen::Vector3d &point1,
                                const Eigen::Vector3d &point2);
@@ -280,7 +280,7 @@ bool FindIntersectionLine(const Eigen::Vector4d &plane1,
 bool CompareTraces(const Trace &t1,
                    const Trace &t2);
 
-bool ImportFracture(const std::string &fileName,
+bool ImportFractures(const std::string &fileName,
                     DFN &dfn);
 
 void CalculateTraces(DFN &dfn,

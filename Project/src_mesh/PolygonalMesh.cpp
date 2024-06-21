@@ -6,7 +6,7 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace FractureLibrary;
+using namespace DFNLibrary;
 
 
 namespace PolygonalLibrary{
@@ -103,7 +103,7 @@ bool CellContainsTrace(const PolygonalMesh &PM,
 
 
 void CreateFirstCell(PolygonalMesh &PM,
-                     const FractureLibrary::Fracture &f,
+                     const DFNLibrary::Fracture &f,
                      unsigned int &idCell2D)
 {
     Cell2D fracture;
@@ -297,7 +297,7 @@ void CreateLastCell(PolygonalMesh &PM,
 
 
 void CreateNewCells(PolygonalMesh &PM,
-                    const FractureLibrary::Trace &t,
+                    const DFNLibrary::Trace &t,
                     unsigned int &idCell0D,
                     unsigned int &idCell1D,
                     unsigned int &idCell2D,
@@ -547,7 +547,7 @@ void CreateNewCells(PolygonalMesh &PM,
 }
 
 void GenerateMesh(PolygonalMesh &PM,
-                const FractureLibrary::Fracture &f,
+                const DFNLibrary::Fracture &f,
                 const double &tol)
 {
 
@@ -565,7 +565,7 @@ void GenerateMesh(PolygonalMesh &PM,
 
     bool pass = true;
 
-    for(const FractureLibrary::Trace &t : f.PassTraces)
+    for(const DFNLibrary::Trace &t : f.PassTraces)
     {
         if(t.IsOnEdge.at(f.Id))
             continue;
@@ -575,7 +575,7 @@ void GenerateMesh(PolygonalMesh &PM,
 
     pass = false;
 
-    for(const FractureLibrary::Trace &t : f.NotPassTraces)
+    for(const DFNLibrary::Trace &t : f.NotPassTraces)
     {
         if(t.IsOnEdge.at(f.Id))
             continue;

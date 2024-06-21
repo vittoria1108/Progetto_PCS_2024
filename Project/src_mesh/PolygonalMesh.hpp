@@ -8,7 +8,7 @@
 
 using namespace std;
 using namespace Eigen;
-using namespace FractureLibrary;
+using namespace DFNLibrary;
 
 
 namespace PolygonalLibrary{
@@ -101,7 +101,7 @@ bool CellContainsTrace(const PolygonalMesh &PM,
                        const double &tol);
 
 void CreateFirstCell(PolygonalMesh &PM,
-                     const FractureLibrary::Fracture &f,
+                     const DFNLibrary::Fracture &f,
                      unsigned int &idCell2D);
 
 void CreateNewCellsByTrace(PolygonalMesh &PM,
@@ -121,7 +121,7 @@ void CreateLastCell(PolygonalMesh &PM,
                     const vector<Cell1D> &newEdges);
 
 void CreateNewCells(PolygonalMesh &PM,
-                    const FractureLibrary::Trace &t,
+                    const DFNLibrary::Trace &t,
                     unsigned int &idCell0D,
                     unsigned int &idCell1D,
                     unsigned int &idCell2D,
@@ -129,7 +129,7 @@ void CreateNewCells(PolygonalMesh &PM,
                     const double &tol);
 
 void GenerateMesh(PolygonalMesh &PM,
-                const FractureLibrary::Fracture &f,
+                const DFNLibrary::Fracture &f,
                 const double &tol);
 
 }

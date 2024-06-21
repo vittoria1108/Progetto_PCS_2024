@@ -11,7 +11,7 @@ using namespace std;
 using namespace Eigen;
 
 
-namespace FractureLibrary{
+namespace DFNLibrary{
 
 double CalculateSquareDistance(const Eigen::Vector3d &point1,
                                const Eigen::Vector3d &point2)
@@ -56,7 +56,7 @@ bool CompareTraces(const Trace &t1,
 }
 
 
-bool ImportFracture(const std::string &fileName,
+bool ImportFractures(const std::string &fileName,
                     DFN &dfn)
 {
 
@@ -253,7 +253,7 @@ bool ReadDFN(const std::string &fileName,
              DFN &dfn,
              const double &tol)
 {
-    if(!ImportFracture(fileName,
+    if(!ImportFractures(fileName,
                         dfn))
         return false;
 

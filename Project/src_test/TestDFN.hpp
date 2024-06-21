@@ -9,7 +9,7 @@
 using namespace Eigen;
 using namespace std;
 
-namespace FractureLibrary {
+namespace DFNLibrary {
 //****************************************************************
 TEST(DFNTEST, TestComputeDistance){
 
@@ -289,12 +289,12 @@ TEST(DFNTEST, TestReadDFNFalse){
 }
 
 //****************************************************************
-TEST(DFNTEST, TestImportFracture){
+TEST(DFNTEST, TestImportFractures){
 
     const string fileName = "./src_test/Test_Fracture.txt";
     DFN dfn;
 
-    bool success = ImportFracture(fileName, dfn);
+    bool success = ImportFractures(fileName, dfn);
 
     MatrixXd vertices(3, 5);
 
@@ -324,7 +324,7 @@ TEST(DFNTEST, TestImportFracture){
 }
 
 //****************************************************************
-TEST(DFNTEST, CalculateTracesSamePlane){
+TEST(DFNTEST, TestCalculateTracesSamePlane){
 
     double tol = 10 * numeric_limits<double>::epsilon();
 
@@ -386,7 +386,7 @@ TEST(DFNTEST, CalculateTracesSamePlane){
     EXPECT_TRUE(f2.Tips[t.Id]);
 }
 
-TEST(DFNTEST, CalculateTracesFalse){
+TEST(DFNTEST, TestCalculateTracesFalse){
 
     double tol = 10 * numeric_limits<double>::epsilon();
 

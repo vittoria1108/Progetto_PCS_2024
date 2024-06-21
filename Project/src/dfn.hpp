@@ -281,7 +281,7 @@ bool CompareTraces(const Trace &t1,
                    const Trace &t2);
 
 bool ImportFractures(const std::string &fileName,
-                    DFN &dfn);
+                     DFN &dfn);
 
 void CalculateTraces(DFN &dfn,
                      Fracture &f1,

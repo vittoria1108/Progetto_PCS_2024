@@ -1,0 +1,125 @@
+@startuml
+package DFNLibrary <<Folder>>
+{
+class DFN
+{
++ NumberFractures : unsigned int
++ Fractures : vector<Fracture>
++ NumberTraces : unsigned int
++ Traces : vector<Trace>
+
+..Non member function..
+bool ImportFractures(fileName, dfn)
+bool ReadDFN(fileName, dfn, tol)
+void WriteOutputFiles(outputTracesFile, outputTipsFile, dfn)
+bool FindIntersectionLine(plane1, plane2, p_r, t_r, tol)
+
+..TEST DFN..
+TestIntersectionLine
+TestReadDFN
+TestImportFractures
+}
+
+class Fracture
+{
++ Id : unsigned int
++ NumberVertices : unsigned int
++ VerticesCoordinates : MatrixXd
++ Barycentre : Vector3d
++ PassTraces : vector<Trace>
++ NotPassTraces : vector<Trace> 
++ Tips : map<unsigned int, bool> 
+
++ Vector4d CalculatePlane()
++ bool IsInPlane(plane,tol)
+       
++ double CalculateR()
++ bool IntersectsLine(p_r, t_r, beta, isOnEdge, tol)
++ bool IntersectsEdges(f, beta_1, beta_2, p_r, t_r, tol)
+
+..TEST FRACTURE..
+TestCalculatePlane
+TestIntersection
+}
+
+class Trace
+{
++ Id : unsigned int
++ FracturesIds : Vector2i
++ EndpointsCoordinates : MatrixXd
++ Length double
++ IsOnEdge : map<unsigned int, bool> 
+
+..Non member function..
+void CalculateTraces(dfn, f1, f2, id, tol) 
+
+..TEST TRACE..
+TestCalculateTraces                    
+}
+
+}
+
+DFN "1" o-- "many" Fracture : is made up of
+DFN "1" o-- "many" Trace : is made up of
+Fracture "1" o-- "many" Trace : contains
+
+package PolygonalLibrary <<Folder>>
+{
+
+class PolygonalMesh
+{
++ NumberCell0D : unsigned int
++ Cells0D : vector<Cell0D>
++ NumberCell1D : unsigned int
++ Cells1D : vector<Cell1D>
++ NumberCell2D : unsigned int
++ Cells2D : vector<Cell2D>    
+
+..Non member function..
+void CreateFirstCell(PM, f, idCell2D)
+void CreateNewCells(PM, t, idCell0D, idCell1D, idCell2D, pass, tol)
+void GenerateMesh(PM, f, tol)              
+}
+
+class Cell0D
+{
++ Id : unsigned int
++ Coordinates : Vector3d
+
+..Non member function..
+bool AlreadyExists(coordinates, PM, id, tol)                  
+}
+
+class Cell1D
+{
++ Id : unsigned int
++ Vertices : Vector2i 
++ IsOld : bool
++ ReplacedBy : vector<unsigned int>
++ NearCells2D : list<unsigned int>
+
+..Non member function..
+bool IntersectionCellTrace(p_s, t_s, p_r, t_r, coordinates, tol)
+}
+
+class Cell2D
+{
++ Id : unsigned int
++ NumberVertices : unsigned int
++ Vertices : vector<unsigned int>
++ NumberEdges : unsigned int
++ Edges : vector<unsigned int>
++ IsOld : bool
++ IsValid : bool
+
++ double CalculateArea(allCells0D)
+
+..Non member function..
+bool CellContainsTrace(PM, cell, p_r, t_r, beta, tol)
+}
+
+PolygonalMesh "1" o-- "many" Cell0D : is made up of
+PolygonalMesh "1" o-- "many" Cell1D : is made up of
+PolygonalMesh "1" o-- "many" Cell2D : is made up of
+}
+@enduml

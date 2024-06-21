@@ -57,7 +57,7 @@ bool CompareTraces(const Trace &t1,
 
 
 bool ImportFractures(const std::string &fileName,
-                    DFN &dfn)
+                     DFN &dfn)
 {
 
     std::ifstream file(fileName);
@@ -254,7 +254,7 @@ bool ReadDFN(const std::string &fileName,
              const double &tol)
 {
     if(!ImportFractures(fileName,
-                        dfn))
+                         dfn))
         return false;
 
     unsigned int traceId = 0;

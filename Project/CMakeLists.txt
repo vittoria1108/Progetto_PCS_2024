@@ -84,4 +84,3 @@ target_compile_options(${PROJECT_NAME} PUBLIC -fPIC)
 target_include_directories(${CMAKE_PROJECT_NAME}_TEST PRIVATE ${${CMAKE_PROJECT_NAME}_includes} ${${CMAKE_PROJECT_NAME}_TEST_includes})
 target_link_libraries(${CMAKE_PROJECT_NAME}_TEST ${${CMAKE_PROJECT_NAME}_LINKED_LIBRARIES})
 target_compile_options(${CMAKE_PROJECT_NAME}_TEST PUBLIC -fPIC)
-

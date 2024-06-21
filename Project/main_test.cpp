@@ -1,6 +1,5 @@
-#include <gtest/gtest.h>
-
 #include "src_test/TestDFN.hpp"
+#include <gtest/gtest.h>
 #include "UCD_test.hpp"
 
 int main(int argc, char ** argv)
